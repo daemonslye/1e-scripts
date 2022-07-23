@@ -1,6 +1,6 @@
 !script {{
   --/|Script Name : 1e Attack Script (1e-attack)
-  --/|Version     : 1.0b
+  --/|Version     : 1.0c
   --/|Requires SC : 2.0.2f+
 
   --/|Description : Automates weapon attack and damage for the AD&D 1e Character Sheet.
@@ -481,8 +481,9 @@
 
   --/|Attack Card
   --+|[&ChatCard]
-  --?"X[*R:weapon_speed]" -eq X -and [&WeaponType] -inc Melee|SkipWeaponDataText
-  --?"X[*R:weapon_speed]" -eq X -and [&WeaponType] -inc Touch|SkipWeaponDataText
+
+  --?"X[*R:weapon_speed]" -eq X -and "[&WeaponType]" -inc Melee|SkipWeaponDataText
+  --?"X[*R:weapon_speed]" -eq X -and "[&WeaponType]" -inc Touch|SkipWeaponDataText
       --+|[&WeaponDataRowCard]
   --:SkipWeaponDataText|
       --?"X[&DamageRowText]" -eq X|SkipWeaponDamageRowText
