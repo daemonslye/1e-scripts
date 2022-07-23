@@ -1,6 +1,6 @@
 !script {{
   --/|Script Name : 1e Attack Script (1e-attack)
-  --/|Version     : 1.0d
+  --/|Version     : 1.0e
   --/|Requires SC : 2.0.2f+
 
   --/|Description : Automates weapon attack and damage for the AD&D 1e Character Sheet.
@@ -335,7 +335,7 @@
   --=AdjustedDamageRoll|[$DamageRoll]*[$BackstabMultiplierDieOnly]+[$StrengthDamageAdj][STR]+[$DMGAdj][DMG]+[$MagicAdj][MAGIC]+[$UserEnteredDamageAdj][USER]+[$MiscDamageAdj][MISC][&DamageMods]*[$BackstabMultiplierAll]
   --=AttackRollNeededwHover|[$AttackRollNeeded][NEEDED TO HIT]
   --&WeaponDataRowText|[b]Speed[/b] [*R:weapon_speed] &nbsp; [b]Length[/b] [*R:weapon_length] ft. &nbsp; [b]Space[/b] [*R:weapon_space]
-  --&BackstabText|[b][#f00]Sneak Attack![/#][/b]
+  --&BackstabText|[b][#f00]Backstab![/#][/b]
   --^AttackChallenge|
 
   --/|Ranged Touch; Range is just for display; No adjustment is made for range and this assumes there is only 1 value
