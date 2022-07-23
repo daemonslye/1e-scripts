@@ -1,6 +1,6 @@
 !script {{
   --/|Script Name : 1e Attack Script (1e-attack)
-  --/|Version     : 1.0c
+  --/|Version     : 1.0d
   --/|Requires SC : 2.0.2f+
 
   --/|Description : Automates weapon attack and damage for the AD&D 1e Character Sheet.
@@ -100,7 +100,7 @@
   --#emoteText|[*S:t-name] attacks [*T:t-name]
   --#emoteState|visible
   --#emoteBackground|#f2f2f3
-  --#emoteFont|"Kaushan Script"
+  --#emoteFont|"Contrail One"
   --#emoteFontColor|#4d1635
   --#emoteFontWeight|regular
   --#emoteFontSize|16px
