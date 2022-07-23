@@ -1,0 +1,501 @@
+!script {{
+  --/|Script Name : 1e Attack Script (1e-attack)
+  --/|Version     : 1.0b
+  --/|Requires SC : 2.0.2f+
+
+  --/|Description : Automates weapon attack and damage for the AD&D 1e Character Sheet.
+  --/|              This includes options for armor rating adj. and adjustments defined by statusmarkers.
+
+  --/|=========================================================================================================
+  --/|SETTINGS
+
+  --/|Weapon Row Number; This will hard-code the weapon row ID.
+  --=WeaponRow|0
+  --Rbyindex|@{selected|character_id};repeating_weapon;[$WeaponRow]
+
+  --/|User Queries; If commented out, the script will not ask; You need to add the ? marks
+  --/|UserEnteredAttackAdj|{To Hit Adj.|0}
+  --/|UserEnteredDamageAdj|{Damage Adj.|0}
+  --/|UserEnteredTargetACAdj|{Target AC Adj. (Negative values make AC Worse)|0}
+
+  --/|Token Bar Settings; The script *requires* all three data values (if &ARSetting is ON).
+  --&HitPointBar|1
+  --&ArmorRatingBar|2
+  --&ArmorClassBar|3
+
+  --/|Armor Rating Adjustments; You can also turn off AR on the character sheet
+  --&ARSetting|ON
+
+  --/|User StatusMarker Adjustments
+  --/|    If set to ON, will look for statusmarkers on selected & target tokens
+  --/|    The the script will look for a sheet called 1e-attack-database
+  --/|    Attributes will be searched for <statusmarkername>_attack and
+  --/|    <statusmarkername>_damage. Any value in the field will be added to the
+  --/|    rolls if the MAX value lists S or T (for Selected or Target).
+  --&UseStatuses|ON
+
+  --/|Weapon Description Text; If you want the weapon's desc text to print, set to ON
+  --&WeapDescText|ON
+
+  --/|Query for Range for Missile Weapons; If ON, a SET RANGE button is generated
+  --&AskforRange|ON
+
+  --/|Decrement Ammo; This setting will reduce ammo by 1 for each missile attack
+  --&DecrementAmmo|ON
+
+  --/|Ammo Saves; If you want to whisper ammo saves to the GM, set to ON
+  --&AmmoSaveSetting|ON
+
+  --/|Backstab Damage Setting; ON will multiply all damage done rather than just the weapon die
+  --&BackstabMultiplyAll|ON
+
+  --/|Apply Damage to Token; If ON, will automatically deduct damage on the target token.
+  --&ApplyDamagetoToken|ON
+
+  --/|END SETTINGS
+  --/|=========================================================================================================
+
+  --/|Script Setup
+
+  --/|Weapon Name;
+  --&WeaponName|
+  --&WeaponName|+[*R:weapon_name]
+
+  --/|Set Weapon Type and Damage Type; Attack Type Values: Melee=0; Ranged=1; Touch=2; Ranged Touch=3;
+  --?[*R:weapon_attack_type] -eq 0|&WeaponType;Melee
+  --?[*R:weapon_attack_type] -eq 1|&WeaponType;Missile
+  --?[*R:weapon_attack_type] -eq 2|&WeaponType;Touch
+  --?[*R:weapon_attack_type] -eq 3|&WeaponType;Ranged Touch
+  --&DamageType|[*R:weapon_attackdmgtype]
+
+  --/|Tokens (blank if not using)
+  --#sourceToken|@{selected|token_id}
+  --#targetToken|@{target|token_id}
+
+  --/|Formatting
+  --#title|[&WeaponName]
+  --#leftsub|[&WeaponType]
+  --#rightsub|[&DamageType]
+
+  --#hideTitleCard|0
+  --#titleFontColor|#000000;
+  --#titleCardBackground|#ffffff;
+  --#titlefontshadow|;
+  --#titleFontLineHeight|1.5em;
+  --#subtitleFontFace|"Contrail One";
+  --#subtitleFontSize|12px
+  --#subtitleFontColor|#000000;
+  --#tableBorderRadius|4px;
+  --#tableborder|2px solid #808080;
+  --#tableShadow|0
+
+  --/|Min/Max Indicator; If 0, will produce colored numbers
+  --#nominmaxhighlight|0
+
+  --#evenRowBackground|#eeeeee;
+  --#oddRowBackground|#ffffff;
+  --#bodyFontFace|Tahoma
+  --#bodyFontSize|14px
+
+  --#emoteText|[*S:t-name] attacks [*T:t-name]
+  --#emoteState|visible
+  --#emoteBackground|#f2f2f3
+  --#emoteFont|"Kaushan Script"
+  --#emoteFontColor|#4d1635
+  --#emoteFontWeight|regular
+  --#emoteFontSize|16px
+
+  --/|Button Format
+  --#buttonBackground|#4d1635
+  --#buttonFontFace|Tahoma
+  --#buttonFontSize|16px
+
+  --/|Table Styles; Used in the Attack Card
+  --/|Row Colors
+  --&Even|#ffffff;
+  --&Odd|#f3f3f3;
+  --&Green|#0BDA51;
+  --&Red|#FAA0A0;
+  --&Yellow|#FFEA00;
+
+  --/|First Row; after card title; adds a dotted line
+  --&trStyle1st|style="background-color:[&Odd]"
+  --&tdStyle1st|style="border-top: 2px dotted #808080;text-align:left;vertical-align:middle;padding: 5px 1px 5px 5px;"
+
+  --/|Table Style
+  --&tStyle1|style="width:100%;padding:1px;border-collapse:collapse;"
+
+  --/|Row Styles
+  --&trStyleEven|style="background-color:[&Even]border-bottom: 2px solid white;"
+  --&trStyleOdd|style="background-color:[&Odd]border-bottom: 2px solid white;"
+  --&trStyleRed|style="background-color:[&Red]border-bottom: 2px solid white;"
+  --&trStyleGreen|style="background-color:[&Green]border-bottom: 2px solid white;"
+
+  --/|Data Cell Styles
+  --&tdStyleLeft|style="text-align:left;vertical-align:middle;padding: 5px 5px 5px 5px;"
+  --&tdStyleCenter|style="font-weight:bold;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
+  --&tdStyleData|style="font-size:80%;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
+  --/|Two-Column Format; Commonly used for buttons: text=left; buttons=right
+  --&tdStyleButtonLeft|style="font-family:Tahoma;font-weight:bold;font-size:100%;width:50%;align:left;valign:middle;padding-left:5px"
+  --&tdStyleButtonRight|style="width:50%;align:right;valign:middle;"
+
+  --/|Row Formatting Variables
+  --&EndRow|[/td][/tr]
+  --&1stRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyle1st]]
+  --&RedCenter|[t [&tStyle1]][tr [&trStyleRed]][td [&tdStyleCenter]]
+  --&GreenCenter|[t [&tStyle1]][tr [&trStyleGreen]][td [&tdStyleCenter]]
+  --&LeftRowEven|[t [&tStyle1]][tr [&trStyleEven]][td [&tdStyleLeft]]
+  --&LeftRowOdd|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleLeft]]
+  --&DataRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleData]]
+  --&TextRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleCenter]]
+
+  --/|Character IDs
+  --&SelectedId|[*S:character_id]
+  --&TargetedId|[*T:character_id]
+
+  --/|Target Touch AC; Used for Touch or Ranged Touch Attack Types.
+  --=ACTotalMagicAdj|
+  --=ACTotalMagicAdj|+[*[&TargetedId]:armorclass_magic_with_shield]
+  --=ACTotalMiscAdj|
+  --=ACTotalMiscAdj|+[*[&TargetedId]:armorclass_mod_with_shield]
+  --=TargetTouchAC|10-[$ACTotalMagicAdj]-[$ACTotalMiscAdj]+[*[&TargetedId]:armorbonus]-[$UserEnteredTargetACAdj][USER] {MAX:10}
+
+  --/|Armor Rating Value (Armor Defense)
+  --=TargetAD|[*T:t-bar[&ArmorRatingBar]_value]
+  --&TargetADString|[*T:t-bar[&ArmorRatingBar]_value]
+
+  --/|Target Size; Uses "Temp Size" instead of Size
+  --&TargetSize|[*T:size2]
+  --?[&TargetSize] -ninc L|SmallMedium
+      --=DamageRoll|[*R:weapon_damagelarge][DMG_LG]
+      --&SizeDesc|LG
+  --^SkipSmallMedium|
+  --:SmallMedium|
+      --=DamageRoll|[*R:weapon_damagesmallmedium][DMG_SM]
+      --&SizeDesc|SM
+  --:SkipSmallMedium|
+
+  --/|Armor Rating Adjustments; If ignore AR is checked, the "-" is read as a 0 adjustment. Otherwise if ARSetting is OFF, the adjustment is ignored for every attack.
+  --=TargetBaseAC|[*T:t-bar[&ArmorClassBar]_value]
+  --?"X[*R:weapon_backstab_flag]" -eq X|SkipBackstabACAdj
+  --?"[*R:weapon_backstab_flag]" -eq 0|SkipBackstabACAdj
+      --=TargetBaseAC|[*[&TargetedId]:armorclass_rear][REAR]
+  --:SkipBackstabACAdj|
+      --=ArmorRatingAdjustment|[*R:weapon_thac_adj[&TargetADString]]
+      --?[&ARSetting] -inc OFF|SetACwNoArmorRating
+      --=TargetAC|[$TargetBaseAC]-[$ArmorRatingAdjustment][AR_ADJ]-[$UserEnteredTargetACAdj][USER] {MAX:10}
+  --^SkipTurnOffArmorRating|
+  --:SetACwNoArmorRating|
+      --=TargetAC|[$TargetBaseAC]-[$UserEnteredTargetACAdj][USER] {MAX:10}
+  --:SkipTurnOffArmorRating|
+
+  --/|Racial Hatred and Class Bonuses;
+  --/|Ranger Check
+  --?"X[*[&TargetedId]:race]" -ninc giant|SkipRangerDamageBonus
+  --?"X[*[&SelectedId]:class]" -inc Ranger|>RangerDamageBonus;level
+  --?"X[*[&SelectedId]:secondclass]" -inc Ranger|>RangerDamageBonus;level_2
+  --?"X[*[&SelectedId]:thirdclass]" -inc Ranger|RangerDamageBonus;level_3
+  --^SkipRangerDamageBonus|
+
+  --:RangerDamageBonus|
+  --?"X[*[&SelectedId]:class]" -inc Ranger|=RangerDamageAdj;[*[&SelectedId]:[%1%]]
+  --?"X[*[&SelectedId]:secondclass]" -inc Ranger|=RangerDamageAdj;[*[&SelectedId]:[%1%]]
+  --?"X[*[&SelectedId]:thirdclass]" -inc Ranger|=RangerDamageAdj;[*[&SelectedId]:[%1%]]
+  --:SkipRangerDamageBonus|
+
+  --/|Dwarf and Gnome Checks
+  --?"X[*[&SelectedId]:race]" -inc dwarf|>CheckforHatred;orc
+  --?"X[*[&SelectedId]:race]" -inc gnome|CheckforHatred;kobold
+  --^SkipHatredCheck|
+  --:CheckforHatred|
+  --?"X[*[&TargetedId]:race]" -inc goblin|=HatredAttackAdj;1
+  --?"X[*[&TargetedId]:race]" -inc [%1%]|=HatredAttackAdj;1
+  --:SkipHatredCheck|
+
+  --/|Add Up Misc Adjustments
+  --=MiscAttackAdj|0+[$HatredAttackAdj]
+  --=MiscDamageAdj|0+[$RangerDamageAdj]
+
+  --/|StatusMarkers
+  --?[&UseStatuses] -inc OFF|SkipStatusChecks
+     --/|General Initialization
+     --&DatabaseSheetID|@{1e-attack-database|character_id}
+     --/|Get the markers on the source and target characters
+     --~|array;statusmarkers;sourceMarkers;@{selected|token_id}
+     --~|array;statusmarkers;targetMarkers;@{target|token_id}
+     --/|Initialize the modifier strings to empty
+     --&AttackMods|
+     --&DamageMods|
+
+     --/|Loop through markers on the Source character
+     --%loop|0;[@sourceMarkers()]
+        --&Marker|[@sourceMarkers([&loop])]
+        --?"X[&Marker]" -eq "X"|SkipSourceMarker
+        --&Party|[*[&DatabaseSheetID]:[&Marker]_attack^]
+        --&Attack|[*[&DatabaseSheetID]:[&Marker]_attack]
+        --&Damage|[*[&DatabaseSheetID]:[&Marker]_damage]
+        --?"X[&Party]" -ne "XS"|SkipSourceMarker
+        --?"X[&Attack]" -ne "Xundefined"|&AttackMods;+ + [&Attack] {[&Marker]}
+        --?"X[&Damage]" -ne "Xundefined"|&DamageMods;+ + [&Damage] {[&Marker]}
+     --:SkipSourceMarker|
+     --%|
+
+     --/|Loop through markers on the Target character
+     --%loop|0;[@targetMarkers()]
+        --&Marker|[@targetMarkers([&loop])]
+        --?"X[&Marker]" -eq "X"|SkipTargetMarker
+        --&Party|[*[&DatabaseSheetID]:[&Marker]_attack^]
+        --&Attack|[*[&DatabaseSheetID]:[&Marker]_attack]
+        --&Damage|[*[&DatabaseSheetID]:[&Marker]_damage]
+        --?"X[&Party]" -ne "XT"|SkipTargetMarker
+        --?"X[&Attack]" -ne "Xundefined"|&AttackMods;+ + [&Attack] {[&Marker]}
+        --?"X[&Damage]" -ne "Xundefined"|&DamageMods;+ + [&Damage] {[&Marker]}
+     --:SkipTargetMarker|
+     --%|
+
+     --/|Clean up extra pluses in the strings and change curly braces to square brackets
+     --~AttackMods|string;replaceall;+ -;-;[&AttackMods]
+     --~AttackMods|string;replaceall;{;[;[&AttackMods]
+     --~AttackMods|string;replaceall;};];[&AttackMods]
+     --~DamageMods|string;replaceall;+ -;-;[&DamageMods]
+     --~DamageMods|string;replaceall;{;[;[&DamageMods]
+     --~DamageMods|string;replaceall;};];[&DamageMods]
+
+  --:SkipStatusChecks|
+
+  --/|Two-Weapon Fighting
+    --?[*R:weapon_dual] -inc Normal|SkipTwo-Weapon
+      --=PrimaryWeaponAdj|[*[&SelectedId]:dual_pen_primary]
+      --=SecondaryWeaponAdj|[*[&SelectedId]:dual_pen_secondary]
+    --?[*R:weapon_dual] -inc Primary|=TwoWeapon;[$PrimaryWeaponAdj]
+    --?[*R:weapon_dual] -inc Secondary|=TwoWeapon;[$SecondaryWeaponAdj]
+      --&TwoWeaponFlag|ON
+  --:SkipTwo-Weapon|
+
+  --/|Attack Roll Needed
+  --=AttackRollNeeded|[*[&SelectedId]:thac[$TargetAC]]
+  --=TouchAttackRollNeeded|[*[&SelectedId]:thac[$TargetTouchAC]]
+
+  --/|Basic Adjustments
+  --=StrengthAttackAdj|[*[&SelectedId]:meleebonus]
+  --=StrengthDamageAdj|[*[&SelectedId]:dmgbonus]
+  --=DexterityAttackAdj|[*[&SelectedId]:rangedbonus]
+  --=ToHitAdj|[*R:weapon_tohitbonus]
+  --=MagicAdj|[*R:weapon_magicbonus]
+  --=DMGAdj|[*R:weapon_attackdmgbonus]
+
+  --/|Weapon Proficiency
+  --=NonProficiencyPenalty|[*[&SelectedId]:weapon_proficiency_penalty]
+  --?[*R:weapon_prof_flag] -eqi 1|SetProfPenalty
+      --=NonProficiencyAdj|0
+  --^SkipProfPenalty|
+      --:SetProfPenalty|
+      --=NonProficiencyAdj|[$NonProficiencyPenalty]
+  --:SkipProfPenalty|
+
+  --/|Backstab; BTB backstab only provides a +4 attack adj. if the target is surprised. If using conditions, this will tie to the Surprised condition. For now, it's added in by default.
+  --?"X[*R:weapon_backstab_flag]" -eq X|SkipBackstab
+  --?"[*R:weapon_backstab_flag]" -eq 0|SkipBackstab
+  --?"X[*R:weapon_backstab_flag]" -eq X0|SkipBackstab
+      --&Backstab|ON
+      --=BackstabAttackAdj|2
+      --=BackstabAttackAdjSurprised|2
+      --=BackstabMultiplierValue|[*[&SelectedId]:backstab]
+      --?[&BackstabMultiplyAll] -ninc ON|SkipMultiplyAll
+         --=BackstabMultiplierAll|[$BackstabMultiplierValue]
+         --=BackstabMultiplierDieOnly|1
+      --^AttackSection|
+      --:SkipMultiplyAll|
+        --=BackstabMultiplierAll|1
+        --=BackstabMultiplierDieOnly|[$BackstabMultiplierValue]
+  --:SkipBackstab|
+  --^AttackSection|
+
+  --/|Attack Rolls by Attack Type
+
+  --:AttackSection|
+  --?"[&WeaponType]" -inc Missile|MissileAttack
+  --?"[&WeaponType]" -inc Ranged|RangedTouchAttack
+  --?"[&WeaponType]" -eq Touch|TouchAttack
+  --^MeleeAttack|
+
+  --:MeleeAttack|
+  --?[&Backstab] -inc ON|BackstabAttack
+      --=AdjustedAttackRoll|1d20+[$StrengthAttackAdj][STR]+[$ToHitAdj][TO_HIT]+[$MagicAdj][MAGIC]+[$NonProficiencyAdj][PROF]+[$UserEnteredAttackAdj][USER]+[$MiscAttackAdj][MISC]+[$TwoWeapon][2WEAP][&AttackMods]
+      --=AdjustedDamageRoll|[$DamageRoll]+[$StrengthDamageAdj][STR]+[$DMGAdj][DMG]+[$MagicAdj][MAGIC]+[$UserEnteredDamageAdj][USER]+[$MiscDamageAdj][MISC][&DamageMods]
+      --=AttackRollNeededwHover|[$AttackRollNeeded][NEEDED TO HIT]
+      --?"X[*R:weapon_speed]" -eq X|SkipWeaponDataRow
+         --&WeaponDataRowText|[b]Speed[/b] [*R:weapon_speed] &nbsp; [b]Length[/b] [*R:weapon_length] ft. &nbsp; [b]Space[/b] [*R:weapon_space]
+         --^AttackChallenge|
+  --:SkipWeaponDataRow|
+  --^AttackChallenge|
+
+  --:BackstabAttack|
+  --=AdjustedAttackRoll|1d20+[$StrengthAttackAdj][STR]+[$ToHitAdj][TO_HIT]+[$MagicAdj][MAGIC]+[$NonProficiencyAdj][PROF]+[$UserEnteredAttackAdj][USER]+[$MiscAttackAdj][MISC]+[$TwoWeapon][2WEAP]+[$BackstabAttackAdj][REAR]+[$BackstabAttackAdjSurprised][BSTAB][&AttackMods]
+  --=AdjustedDamageRoll|[$DamageRoll]*[$BackstabMultiplierDieOnly]+[$StrengthDamageAdj][STR]+[$DMGAdj][DMG]+[$MagicAdj][MAGIC]+[$UserEnteredDamageAdj][USER]+[$MiscDamageAdj][MISC][&DamageMods]*[$BackstabMultiplierAll]
+  --=AttackRollNeededwHover|[$AttackRollNeeded][NEEDED TO HIT]
+  --&WeaponDataRowText|[b]Speed[/b] [*R:weapon_speed] &nbsp; [b]Length[/b] [*R:weapon_length] ft. &nbsp; [b]Space[/b] [*R:weapon_space]
+  --&BackstabText|[b][#f00]Sneak Attack![/#][/b]
+  --^AttackChallenge|
+
+  --/|Ranged Touch; Range is just for display; No adjustment is made for range and this assumes there is only 1 value
+  --:RangedTouchAttack|
+  --&rangeValue|[*R:weapon_range]
+  --~|array;fromstring;ranges;/;[&rangeValue]
+      --=AdjustedAttackRoll|1d20+[$DexterityAttackAdj][DEX]+[$ToHitAdj][TO_HIT]+[$MagicAdj][MAGIC]+[$NonProficiencyAdj][PROF]+[$UserEnteredAttackAdj][USER]+[$MiscAttackAdj][MISC][&AttackMods]
+      --=AdjustedDamageRoll|[$DamageRoll]+[$DMGAdj][DMG]+[$MagicAdj][MAGIC]+[$UserEnteredDamageAdj][USER]+[$MiscDamageAdj][MISC]
+      --=TouchAttackRollNeededwHover|[$TouchAttackRollNeeded][NEEDED TO HIT]
+      --&WeaponDataRowText|[b]Range[/b] [@ranges(0)]
+  --^AttackChallengeTouch|
+
+  --:TouchAttack|
+  --=AdjustedAttackRoll|1d20+[$StrengthAttackAdj][STR]+[$ToHitAdj][TO_HIT]+[$MagicAdj][MAGIC]+[$NonProficiencyAdj][PROF]+[$UserEnteredAttackAdj][USER]+[$MiscAttackAdj][MISC]+[$TwoWeapon][2WEAP][&AttackMods]
+  --=AdjustedDamageRoll|[$DamageRoll]+[$DMGAdj][DMG]+[$MagicAdj][MAGIC]+[$UserEnteredDamageAdj][USER]
+  --=TouchAttackRollNeededwHover|[$TouchAttackRollNeeded][NEEDED TO HIT]
+  --&WeaponDataRowText|
+  --^AttackChallengeTouch|
+
+  --:MissileAttack|
+  --/|Range Category
+  --&rangeValue|[*R:weapon_range]
+  --~|array;fromstring;ranges;/;[&rangeValue]
+      --/|+Ranges|Short: [@ranges(0)], Med: [@ranges(1)], Long: [@ranges(2)]
+      --=RangedShort|[@ranges(0)]
+      --=RangedMedium|[@ranges(1)]
+      --=RangedLong|[@ranges(2)]
+
+  --?[&AskforRange] -ninc ON|SkipAskforRange
+      --ISELECT RANGE CATEGORY ;Set Range|q;RangeCategory;Range Category|Short [@ranges(0)]|Medium [@ranges(1)]|Long [@ranges(2)]
+      --?"[&RangeCategory]" -inc Short|&ShortIndicator;>
+      --?"[&RangeCategory]" -inc Medium|=RangeAdj;-2
+      --?"[&RangeCategory]" -inc Medium|&MedIndicator;>
+      --?"[&RangeCategory]" -inc Long|=RangeAdj;-5
+      --?"[&RangeCategory]" -inc Long|&LongIndicator;>
+  --:SkipAskforRange|
+
+  --&WeaponDataRowText|[b][&ShortIndicator]Short[/b] [@ranges(0)]&nbsp;/&nbsp;[b][&MedIndicator]Medium[/b] [@ranges(1)]&nbsp;/&nbsp;[b][&LongIndicator]Long[/b] [@ranges(2)]
+
+  --/|Subtract Ammo; If the player puts an X in the weapon's Qty field, ammo will not decrement. Change to OFF in Settings above.
+  --?[&DecrementAmmo] -ninc ON|SkipSubtractAmmo
+  --?"X[*R:weapon_quantity]" -eq X|SkipSubtractAmmo
+  --?"X[*R:weapon_quantity]" -eqi "XX"|SkipSubtractAmmo
+  --?[*R:weapon_quantity] -lt 1|OutofAmmo
+  --^SkipOutofAmmo|
+
+  --:OutofAmmo|
+  --&OutofAmmo|You ran out of ammo, charges, or thrown weapons!
+  --^PrintCard|
+
+  --:SkipOutofAmmo|
+     --!a:[&SelectedId]|[*R>weapon_quantity]:-=1
+
+  --/|Ammo Saves; Set to OFF in SETTINGS above
+  --?[&AmmoSaveSetting] -ne ON|SkipAmmoSaves
+     --=AmmoSave|1d20
+     --=MagicArrowSave|1d100
+     --*Ammo Save|[$AmmoSave] vs. 13/6 [Crushing/Normal Blow]
+     --*Magic Arrow|[$MagicArrowSave] vs. 51 (Low=Broken)
+  --:SkipAmmoSaves|
+  --:SkipSubtractAmmo|
+
+  --/|Missile Attack Roll
+  --=AdjustedAttackRoll|1d20+[$DexterityAttackAdj][DEX]+[$ToHitAdj][TO_HIT]+[$MagicAdj][MAGIC]+[$RangeAdj][RANGE]+[$NonProficiencyAdj][PROF]+[$UserEnteredAttackAdj][USER][&AttackMods]
+  --=AdjustedDamageRoll|[$DamageRoll]+[$DMGAdj][DMG]+[$MagicAdj][MAGIC]+[$MiscDamageAdj][MISC]+[$UserEnteredDamageAdj][USER][&DamageMods]
+  --=AttackRollNeededwHover|[$AttackRollNeeded][NEEDED TO HIT]
+  --^AttackChallenge|
+
+  --:AttackChallengeTouch|
+  --&AttackCard1|[b]Attack Roll[/b] [$AdjustedAttackRoll] vs. AC [$TargetTouchAC] ([$TouchAttackRollNeededwHover])
+  --?[$AdjustedAttackRoll.Base] -eq 20|Hit
+  --?[$AdjustedAttackRoll.Base] -eq 1|Miss
+  --?[$AdjustedAttackRoll] -ge [$TouchAttackRollNeeded]|Hit
+  --^Miss|
+
+  --:AttackChallenge|
+  --&AttackCard1|[b]Attack Roll[/b] [$AdjustedAttackRoll] vs. AC [$TargetAC] ([$AttackRollNeededwHover])
+  --?[$AdjustedAttackRoll.Base] -eq 20|Hit
+  --?[$AdjustedAttackRoll.Base] -eq 1|Miss
+  --?[$AdjustedAttackRoll] -ge [$AttackRollNeeded]|Hit
+  --^Miss|
+
+  --:Hit|
+  --&HitText|Hit!
+  --&ColoredRow1|[&trStyleGreen]
+  --&DamageRowText|[b]Damage[/b] [$AdjustedDamageRoll] vs. [&SizeDesc] ([$DamageRoll])
+  --?[&WeapDescText] -inc OFF|SkipDescText
+      --&DescRowText|[*R:weapon_notes]
+  --:SkipDescText|
+
+  --/|Apply Damage to Token
+  --?[&ApplyDamagetoToken] -ninc ON|SkipDeadX
+     --!t:@{target|token_id}|bar[&HitPointBar]_value:-=[$AdjustedDamageRoll]
+     --&RemainingHP|[*T:t-bar[&HitPointBar]_value]
+     --?[&RemainingHP] -le 0|DeadX
+  --^SkipDeadX|
+  --:DeadX|
+     --@token-mod|_ignore-selected _ids @{target|token_id} _set statusmarkers|dead
+  --:SkipDeadX|
+  --^PrintCard|
+
+  --:Miss|
+  --&ColoredRow1|[&trStyleRed]
+  --&HitText|Miss!
+
+  --:PrintCard|
+  --/|Out of Ammo Msg
+  --?"X[&OutofAmmo]" -eq X|PrintNormalCard
+      --&ColoredRow1|[&trStyleRed]
+      --&OutofAmmoChatCard|
+        [t [&tStyle1]]
+        [tr [&ColoredRow1]][td [&tdStyleCenter]][&OutofAmmo][&EndRow]
+        [/t]
+      --+|[&OutofAmmoChatCard]
+  --X|
+
+  --:PrintNormalCard|
+  --&ChatCard|
+      [t [&tStyle1]]
+      [tr [&trStyle1st]][td [&tdStyle1st]][&AttackCard1][&EndRow]
+      [tr [&ColoredRow1]][td [&tdStyleCenter]][&HitText][&EndRow]
+      [/t]
+
+  --&WeaponDataRowCard|
+      [t [&tStyle1]]
+      [&DataRowCenter][&WeaponDataRowText][&EndRow]
+      [/t]
+
+  --&DamageCard|
+      [t [&tStyle1]]
+      [&LeftRowEven][&DamageRowText][&EndRow]
+      [/t]
+
+  --&WeaponDescCard|
+      [t [&tStyle1]]
+      [&LeftRowOdd][&DescRowText][&EndRow]
+      [/t]
+
+  --&BackstabCard|
+      [t [&tStyle1]]
+      [&TextRowCenter][&BackstabText][&EndRow]
+      [/t]
+
+  --/|Attack Card
+  --+|[&ChatCard]
+  --?"X[*R:weapon_speed]" -eq X -and [&WeaponType] -inc Melee|SkipWeaponDataText
+  --?"X[*R:weapon_speed]" -eq X -and [&WeaponType] -inc Touch|SkipWeaponDataText
+      --+|[&WeaponDataRowCard]
+  --:SkipWeaponDataText|
+      --?"X[&DamageRowText]" -eq X|SkipWeaponDamageRowText
+      --+|[&DamageCard]
+  --:SkipWeaponDamageRowText|
+      --?"X[&DescRowText]" -eq X|SkipWeaponDescRowText
+      --+|[&WeaponDescCard]
+  --:SkipWeaponDescRowText|
+
+  --?[&Backstab] -ninc ON|SkipBackstabChat
+      --+|[&BackstabCard]
+  --:SkipBackstabChat|
+
+  --X|
+  --/|End Script
+  }}
