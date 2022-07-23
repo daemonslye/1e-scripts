@@ -1,0 +1,126 @@
+!script {{
+  --#whisper|self
+
+  --/|TOKENS (blank if not using)
+    --#sourceToken|@{selected|token_id}
+    --&SelectedId|[*S:character_id]
+
+  --#title|@{selected|token_name}'s Weapons Menu
+
+  --/|FORMATTING
+    --#hideTitleCard|0
+
+    --#titleFontColor|#000000;
+    --#titleCardBackground|#ffffff;
+    --#titlefontshadow|;
+    --#titleFontLineHeight|1.5em;
+
+    --#subtitleFontFace|"Contrail One";
+    --#subtitleFontSize|12px
+    --#subtitleFontColor|#000000;
+
+    --#tableBorderRadius|4px;
+    --#tableborder|2px solid #808080;
+    --#tableShadow|0
+
+    --/|MIN/MAX INDICATOR ON ROLLS; IF 0, will produce colored numbers
+    --#nominmaxhighlight|0
+
+    --#evenRowBackground|#eeeeee;
+    --#oddRowBackground|#ffffff;
+    --#bodyFontFace|Tahoma
+    --#bodyFontSize|14px
+
+    --#emoteText|[*S:t-name] attacks [*T:t-name]
+    --#emoteState|visible
+    --#emoteBackground|#f2f2f3
+    --#emoteFont|"Kaushan Script"
+    --#emoteFontColor|#4d1635
+    --#emoteFontWeight|regular
+    --#emoteFontSize|16px
+
+  --/|BUTTON FORMAT (seems to work best with sheetbutton or rbutton)
+    --#buttonBackground|#4d1635
+    --#buttonFontFace|Tahoma
+    --#buttonFontSize|14px
+
+    --/|TABLE STYLES
+      --/|ROW COLORS
+        --&Even|#ffffff;
+        --&Odd|#f3f3f3;
+        --&Green|#0BDA51;
+        --&Red|#FAA0A0;
+        --&Yellow|#FFEA00;
+
+    --/|1ST ROW STYLES (after card title; adds a dotted line)
+      --&trStyle1st|style="background-color:[&Odd]"
+      --&tdStyle1st|style="border-top: 2px dotted #808080;text-align:left;vertical-align:middle;padding: 5px 1px 5px 5px;"
+
+    --/|TABLE STYLE
+      --&tStyle1|style="width:100%;padding:1px;border-collapse:collapse;"
+
+    --/|ROW STYLES
+      --&trStyleEven|style="background-color:[&Even]border-bottom: 2px solid white;"
+      --&trStyleOdd|style="background-color:[&Odd]border-bottom: 2px solid white;"
+      --&trStyleRed|style="background-color:[&Red]border-bottom: 2px solid white;"
+      --&trStyleGreen|style="background-color:[&Green]border-bottom: 2px solid white;"
+
+    --/|DATA CELL STYLES
+      --&tdStyleLeft|style="text-align:left;vertical-align:middle;padding: 5px 5px 5px 5px;"
+      --&tdStyleCenter|style="font-weight:bold;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
+      --&tdStyleData|style="font-size:80%;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
+      --/|TWO COLUMN FORMAT (commonly used for buttons: text=left; buttons=right)
+        --&tdStyleButtonLeft|style="font-family:Tahoma;font-weight:regular;font-size:100%;width:50%;align:left;valign:middle;padding-left:5px"
+        --&tdStyleButtonRight|style="width:50%;align:right;valign:middle;"
+
+    --/|ROW FORMATTING VARIABLES
+      --&EndRow|[/td][/tr]
+      --&1stRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyle1st]]
+      --&RedCenter|[t [&tStyle1]][tr [&trStyleRed]][td [&tdStyleCenter]]
+      --&GreenCenter|[t [&tStyle1]][tr [&trStyleGreen]][td [&tdStyleCenter]]
+      --&LeftRowEven|[t [&tStyle1]][tr [&trStyleEven]][td [&tdStyleLeft]]
+      --&LeftRowOdd|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleLeft]]
+      --&DataRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleData]]
+      --&TextRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleCenter]]
+      --&LeftButtonRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyleButtonLeft]]
+
+  --&SelectedID|[*S:character_id]
+  --Rfirst|@{selected|character_id};repeating_weapon
+  --=Count|1
+  --&Buttons|
+  --?"[*R:weapon_name]" -ne "NoRepeatingAttributeLoaded"|[
+    --:Weapon_Display|
+    --&Button|[button][*R:weapon_name]::!&#13;#1e-attack-ask[$Count][/button]
+    --&PrintLine|+ [&LeftButtonRowFormat][&Button][&EndRow]
+    --=Count|[$Count] + 1
+    --Rnext|
+    --?"[*R:weapon_name]" -ne "NoRepeatingAttributeLoaded"|Weapon_Display
+    --+|[&PrintLine]
+  --]|
+  --X|
+  }}
+
+
+  --:CreateButtons|
+  --&Buttons|+
+      [t [&tStyle1]]
+          [tr [&trStyle1]]
+              [td [&tdStyle1]]Weapon 1[/td][td [&tdStyleButtonRight]][button][*R:weapon_name]::!&#13;#1e-attack[$Count][/button][&EndRow]
+
+
+
+---------------saved
+--&SelectedID|[*S:character_id]
+--Rfirst|@{selected|character_id};repeating_weapon
+--=Count|1
+--&Weapons|[br]
+--?"[*R:weapon_name]" -ne "NoRepeatingAttributeLoaded"|[
+  --:Weapon_Display|
+    --&Weapons|+ [button][*R:weapon_name]::!&#13;#1e-attack[$Count][/button]
+    --=Count|[$Count] + 1
+    --Rnext|
+    --?"[*R:weapon_name]" -ne "NoRepeatingAttributeLoaded"|Weapon_Display
+    --+Weapons|[&Weapons]
+--]|
+--X|
+}}
