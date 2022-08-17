@@ -1,0 +1,107 @@
+!script {{
+    --#whisper|self
+    --#sourceToken|@{selected|token_id}
+    --#hideTitleCard|1
+    --&SelectedID|[*S:character_id]
+    --&CharacterName|[*S:character_name]
+
+    --:ADD_WEAPON|
+
+    --/|WEAPON FIELD NAMES
+      --&00_WeaponName|weapon_name
+      --&01_AttackTypeDropDown|weapon_attack_type
+      --&02_ToHitAdj|weapon_tohitbonus
+      --&03_MagicAdj|weapon_magicbonus
+      --&04_NPPenaltyCheckbox|weapon_prof_flag
+      --&05_DualWieldDropDown|weapon_dual
+      --&06_DualWieldAdj|weapon_dual_pen
+      --&07_WhisperMatrix|weapon_whisper_to_hit_select
+      --&08_DamageDiceSM|weapon_damagesmallmedium
+      --&09_DamageDiceLarge|weapon_damagelarge
+      --&10_DamageAdj|weapon_attackdmgbonus
+      --&11_DMGType|weapon_attackdmgtype
+      --&12_NumberofAttacks|weapon_num_attacks
+      --&13_FireRate|weapon_rateoffire
+      --&14_RangeInFeet|weapon_range
+      --&15_AmmoCurrent|weapon_ammo
+      --&16_AmmoMax|weapon_ammo_max
+      --&17_Quantity|weapon_quantity
+      --&18_WeightInCoins|weapon_weight
+      --&19_CostInGP|weapon_cost
+      --&20_Length|weapon_length
+      --&21_SpaceNeededInFeet|weapon_space
+      --&22_WeaponSpeedFactor|weapon_speed
+      --&23_ArmorRating_0_Adj|weapon_thac_adj0
+      --&24_ArmorRating_1_Adj|weapon_thac_adj1
+      --&25_ArmorRating_2_Adj|weapon_thac_adj2
+      --&26_ArmorRating_3_Adj|weapon_thac_adj3
+      --&27_ArmorRating_4_Adj|weapon_thac_adj4
+      --&28_ArmorRating_5_Adj|weapon_thac_adj5
+      --&29_ArmorRating_6_Adj|weapon_thac_adj6
+      --&30_ArmorRating_7_Adj|weapon_thac_adj7
+      --&31_ArmorRating_8_Adj|weapon_thac_adj8
+      --&32_ArmorRating_9_Adj|weapon_thac_adj9
+      --&33_ArmorRating_10_Adj|weapon_thac_adj10
+      --&34_ShowWithRollCheckbox|weapon_tohitacadj_flag
+      --&35_DescriptionField|weapon_notes
+      --&36_MacroField|weapon_macro_text
+
+    --/|WEAPON ATTRIBUTE LINKS (Will add to Weapon Description field aka: 35_DescriptionField
+
+      --&Arcing|[Arcing]
+      --&Arcingx3|[Arcing x3]
+      --&Brace|[Brace]
+      --&Brace_Large|[Brace (Large)]
+      --&Control|[Control]
+      --&Disarm|[Disarm]
+      --&Dismount|[Dismount]
+      --&Entangle|[Entangle]
+      --&Loading|[Loading]
+      --&MountedCharge|[Mounted Charge]
+      --&Offhand|[Offhand]
+      --&Polearm|[Polearm]
+      --&Pummeling|[Pummeling]
+      --&Shield|[Shield]
+      --&Snag|[Snag]
+      --&Special|[Special]
+      --&Versatile|[Versatile]
+
+
+    --/|MISSILE WEAPON DATA
+    --&HandAxeThrown|Hand Axe (Thrown):1:0:0:0:0:0:0:1d6:1d4:0:Chopping:1:1:10/20/30:x:0:1:50:1:0:0:0:0:0:4:3:2:1:1:0:0:0:-1:0::[&MacroText]
+    --&Blowgun|Blowgun:1:0:0:0:0:0:0:1:1:0:Piercing:1:1:10/20/30:x:0:1:10:20:0:0:0:0:0:9:8:6:4:2:1:1:-1:-2:0:[&Loading]:[&MacroText]
+    --&CompLongBow|Comp. Long Bow:1:0:0:0:0:0:0:1d6:1d6:0:Piercing:1:2:60/120/210:x:0:1:80:100:0:0:0:0:0:2:1:0:0:-1:-2:-2:-3:-3:0:[&Arcingx3]:[&MacroText]
+    --&CompShortBow|Comp. Short Bow:1:0:0:0:0:0:0:1d6:1d6:0:Piercing:1:2:50/100/180:x:0:1:50:75:0:0:0:0:0:3:3:1:0:-1:-2:-2:-2:-3:0:[&Arcing]:[&MacroText]
+    --&LongBow|Long Bow:1:0:0:0:0:0:0:1d6:1d6:0:Piercing:1:2:70/140/210:x:0:1:50:60:0:0:0:0:0:1:0:0:-1:-2:-3:-3:-3:-3:0:[&Arcingx3]:[&MacroText]
+    --&ShortBow|Short Bow:1:0:0:0:0:0:0:1d6:1d6:0:Piercing:1:2:50/100/150:x:0:1:50:15:0:0:0:0:0:5:4:1:0:0:-1:-2:-2:-2:0:[&Arcing]:[&MacroText]
+    --&ClubThrown|Club (Thrown):1:0:0:0:0:0:0:1d6:1d3:0:Bludgeoning:1:1:10/20/30:x:0:1:30:0:0:0:0:0:0:7:5:3:2:1:1:1:0:0:0::[&MacroText]
+    --&HandCrossbow|Hand Crossbow:1:0:0:0:0:0:0:1d3:1d2:0:Piercing:1:1:20/40/60:x:0:1:20:300:0:0:0:0:0:2:1:0:0:0:-1:-2:-2:-3:0:[&Special]:[&MacroText]
+    --&HeavyCrossbow|Heavy Crossbow:1:0:0:0:0:0:0:1d4+1:1d6+1:0:Piercing:1:1:80/160/240:x:0:1:80:20:0:0:0:0:0:1:0:-1:-2:-3:-3:-4:-4:-4:0:[&Loading]:[&MacroText]
+    --&LightCrossbow|Light Crossbow:1:0:0:0:0:0:0:1d4:1d4:0:Piercing:1:1:60/120/180:x:0:1:50:12:0:0:0:0:0:2:1:0:0:-1:-2:-3:-3:-3:0:[&Loading]:[&MacroText]
+    --&DaggerThrown|Dagger (Thrown):1:0:0:0:0:0:0:1d4:1d3:0:Piercing:1:2:10/20/30:x:0:1:10:2:0:0:0:0:0:5:4:3:2:1:1:0:0:-1:0::[&MacroText]
+    --&Dart|Dart:1:0:0:0:0:0:0:1d3:1d2:0:Piercing:1:3:15/30/45:x:0:1:5:0.5:0:0:0:0:0:5:4:3:2:1:0:-1:0:-1:0::[&MacroText]
+    --&WarHammerThrown|War Hammer (Thrown):1:0:0:0:0:0:0:1d4+1:1d4:0:Bludgeoning:1:1:10/20/30:x:0:1:50:1:0:0:0:0:0:2:1:0:0:0:0:0:0:-1:0::[&MacroText]
+    --&HarpoonThrown|Harpoon (Thrown):1:0:0:0:0:0:0:2d4:2d6:0:Piercing:1:1:10/20/30:x:0:1:60:5:0:0:0:0:0:4:3:2:1:0:0:0:0:-1:0::[&MacroText]
+    --&Javelin|Javelin:1:0:0:0:0:0:0:1d6:1d6:0:Piercing:1:1:20/40/60:x:0:1:20:0.5:0:0:0:0:0:5:4:3:2:1:0:-1:0:-1:0:[&Arcing]:[&MacroText]
+    --&Shuriken|Shuriken:1:0:0:0:0:0:0:1d3:1d2:0:Piercing:1:3:5/10/20:x:0:1:5:2:0:0:0:0:0:5:4:3:2:1:0:-1:0:-1:0::[&MacroText]
+    --&SlingBullet|Sling Bullet:1:0:0:0:0:0:0:1d4+1:1d6+1:0:Bludgeoning:1:1:50/100/200:x:0:1:0:0:0:0:0:0:0:2:2:1:0:0:0:-2:-1:-3:0:[&Arcing] [&Loading]:[&MacroText]
+    --&SlingStone|Sling Stone:1:0:0:0:0:0:0:1d4:1d4:0:Bludgeoning:1:1:40/80/160:x:0:1:0:0:0:0:0:0:0:5:4:2:1:0:0:-2:-1:-3:0:[&Arcing] [&Loading]:[&MacroText]
+    --&MediumSpear|Medium Spear:1:0:0:0:0:0:0:1d6:1d8:0:Piercing:1:1:10/20/30:x:0:1:50:1:0:0:0:0:0:2:2:2:2:1:0:0:0:-1:0::[&MacroText]
+    --&ShortSpear|Short Spear:1:0:0:0:0:0:0:1d6:1d8:0:Piercing:1:1:10/20/30:x:0:1:40:1:0:0:0:0:0:3:3:2:2:1:0:0:0:0:0::[&MacroText]
+
+      --:SelectMissileWeapon|
+
+      --&SelectedWeapon|?{Select Weapon|Axe&#44; hand,HandAxeThrown|Blowgun,Blowgun|Bow&#44; comp. long,CompLongBow|Bow&#44; comp. short,CompShortBow|Bow&#44; long,LongBow|Bow&#44; short,ShortBow|Club,ClubThrown|Crossbow&#44; hand,HandCrossbow|Crossbow&#44; heavy,HeavyCrossbow|Crossbow&#44; light,LightCrossbow|Dagger,DaggerThrown|Dart,Dart|Hammer&#44; war,WarHammerThrown|Harpoon,HarpoonThrown|Javelin,Javelin|Shuriken,Shuriken|Sling (bullet),SlingBullet|Sling (stone),SlingStone|Spear&#44; medium,MediumSpear|Spear&#44;short,ShortSpear}
+
+      --&WeaponData|[&[&SelectedWeapon]]
+
+      --/|Just trying to reduce the number of characters; this is the CREATE string for ChatSetAttr
+      --&CW|repeating_weapon_-CREATE_
+
+      --~|array;fromstring;field_number;:;[&WeaponData]
+
+      --@setattr| _charid [&SelectedID] _fb-public _fb-header Adding A New Weapon to [&CharacterName] _fb-content Adding a [&SelectedWeapon]. _[&CW][&00_WeaponName]|[@field_number(0)] _[&CW][&01_AttackTypeDropDown]|[@field_number(1)] _[&CW][&02_ToHitAdj]|[@field_number(2)] _[&CW][&03_MagicAdj]|[@field_number(3)] _[&CW][&04_NPPenaltyCheckbox]|[@field_number(4)] _[&CW][&05_DualWieldDropDown]|[@field_number(5)] _[&CW][&06_DualWieldAdj]|[@field_number(6)] _[&CW][&07_WhisperMatrix]|[@field_number(7)] _[&CW][&08_DamageDiceSM]|[@field_number(8)] _[&CW][&09_DamageDiceLarge]|[@field_number(9)] _[&CW][&10_DamageAdj]|[@field_number(10)] _[&CW][&11_DMGType]|[@field_number(11)] _[&CW][&12_NumberofAttacks]|[@field_number(12)] _[&CW][&13_FireRate]|[@field_number(13)] _[&CW][&14_RangeInFeet]|[@field_number(14)] _[&CW][&15_AmmoCurrent]|[@field_number(15)] _[&CW][&16_AmmoMax]|[@field_number(16)] _[&CW][&17_Quantity]|[@field_number(17)] _[&CW][&18_WeightInCoins]|[@field_number(18)] _[&CW][&19_CostInGP]|[@field_number(19)] _[&CW][&20_Length]|[@field_number(20)] _[&CW][&21_SpaceNeededInFeet]|[@field_number(21)] _[&CW][&22_WeaponSpeedFactor]|[@field_number(22)] _[&CW][&23_ArmorRating_0_Adj]|[@field_number(23)] _[&CW][&24_ArmorRating_1_Adj]|[@field_number(24)] _[&CW][&25_ArmorRating_2_Adj]|[@field_number(25)] _[&CW][&26_ArmorRating_3_Adj]|[@field_number(26)] _[&CW][&27_ArmorRating_4_Adj]|[@field_number(27)] _[&CW][&28_ArmorRating_5_Adj]|[@field_number(28)] _[&CW][&29_ArmorRating_6_Adj]|[@field_number(29)] _[&CW][&30_ArmorRating_7_Adj]|[@field_number(30)] _[&CW][&31_ArmorRating_8_Adj]|[@field_number(31)] _[&CW][&32_ArmorRating_9_Adj]|[@field_number(32)] _[&CW][&33_ArmorRating_10_Adj]|[@field_number(33)] _[&CW][&34_ShowWithRollCheckbox]|[@field_number(34)] _[&CW][&35_DescriptionField]|[@field_number(35)] _[&CW][&36_MacroField]|[@field_number(36)]
+
+    --X|
+
+    }}
