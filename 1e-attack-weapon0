@@ -10,7 +10,7 @@
   --/|SETTINGS
 
   --/|Weapon Row Number; This will hard-code the weapon row ID.
-  --=WeaponRow|0
+  --=WeaponRow|1
   --Rbyindex|@{selected|character_id};repeating_weapon;[$WeaponRow]
 
   --/|User Queries; If commented out, the script will not ask; You need to add the ? marks
@@ -29,8 +29,8 @@
   --/|User StatusMarker Adjustments
   --/|    If set to ON, will look for statusmarkers on selected & target tokens
   --/|    The the script will look for a sheet called 1e-attack-database
-  --/|    Attributes will be searched for _attack and
-  --/|    _damage. Any value in the field will be added to the
+  --/|    Attributes will be searched for <statusmarkername>_attack and
+  --/|    <statusmarkername>_damage. Any value in the field will be added to the
   --/|    rolls if the MAX value lists S or T (for Selected or Target).
   --&UseStatuses|ON
 
@@ -59,7 +59,7 @@
 
   --/|Weapon Attack Script
   --:PERFORM_WEAPON_ATTACK| Reentrant Point
-  
+
   --/|Split the reentryval parameters into an array
   --/|1=Weapon Slot, 2=Number of Attackers, 3=Target Token ID, 4=User Attack Adj, 5=User Damage Adj, 6=User AC Adj
   --~params|string;split;|;[&WeaponSlot]|1|@{target|token_id}
@@ -67,13 +67,13 @@
   --/|If there are only 3 parameters, there were no user defs, so skip setting them
   --?[$paramsCount] -eq 3|SKIP_USER_DEF_PARAMS
 
-  --=UserEnteredAttackAdj|[¶ms4]
-  --=UserEnteredDamageAdj|[¶ms5]
-  --=UserEnteredTargetACAdj|[¶ms6]
+  --=UserEnteredAttackAdj|[&params4]
+  --=UserEnteredDamageAdj|[&params5]
+  --=UserEnteredTargetACAdj|[&params6]
 
   --:SKIP_USER_DEF_PARAMS|
-  
-  --=WeaponRow|[¶ms1]
+
+  --=WeaponRow|[&params1]
   --Rbyindex|@{selected|character_id};repeating_weapon;[$WeaponRow]
 
 
@@ -94,13 +94,13 @@
   --?"X[*R:weapon_attack_type]" -eq "X2" -and "X[*R:weapon_num_attacks]" -ne "X"|=AttackMultiplier;[*R:weapon_num_attacks]
   --?"X[*R:weapon_attack_type]" -eq "X3" -and "X[*R:weapon_rateoffire]" -ne "X"|=AttackMultiplier;[*R:weapon_rateoffire]
 
-  --=AttacksRemaining|[¶ms2] * [$AttackMultiplier.Raw] {MIN:1}
-  --=AttacksTotalCount|[¶ms2] * [$AttackMultiplier.Raw] {MIN:1}
+  --=AttacksRemaining|[&params2] * [$AttackMultiplier.Raw] {MIN:1}
+  --=AttacksTotalCount|[&params2] * [$AttackMultiplier.Raw] {MIN:1}
   --=AttackCounter|1
 
   --/|Tokens (blank if not using)
   --#sourceToken|@{selected|token_id}
-  --#targetToken|[¶ms3]
+  --#targetToken|[&params3]
 
   --/|Formatting
   --#title|[&WeaponName]
@@ -257,7 +257,7 @@
      --&DatabaseSheetID|@{1e-attack-database|character_id}
      --/|Get the markers on the source and target characters
      --~|array;statusmarkers;sourceMarkers;@{selected|token_id}
-     --~|array;statusmarkers;targetMarkers;[¶ms3]
+     --~|array;statusmarkers;targetMarkers;[&params3]
      --/|Initialize the modifier strings to empty
      --&AttackMods|
      --&DamageMods|
@@ -360,7 +360,7 @@
       --=AdjustedDamageRoll|[$DamageRoll]+[$StrengthDamageAdj][STR]+[$DMGAdj][DMG]+[$MagicAdj][MAGIC]+[$UserEnteredDamageAdj][USER]+[$MiscDamageAdj][MISC][&DamageMods]
       --=AttackRollNeededwHover|[$AttackRollNeeded][NEEDED TO HIT]
       --?"X[*R:weapon_speed]" -eq X|SkipWeaponDataRow
-         --&WeaponDataRowText|[b]Speed[/b] [*R:weapon_speed]   [b]Length[/b] [*R:weapon_length] ft.   [b]Space[/b] [*R:weapon_space]
+         --&WeaponDataRowText|[b]Speed[/b] [*R:weapon_speed] &nbsp; [b]Length[/b] [*R:weapon_length] ft. &nbsp; [b]Space[/b] [*R:weapon_space]
          --^AttackChallenge|
   --:SkipWeaponDataRow|
   --^AttackChallenge|
@@ -369,14 +369,14 @@
   --=AdjustedAttackRoll|1d20+[$StrengthAttackAdj][STR]+[$ToHitAdj][TO_HIT]+[$MagicAdj][MAGIC]+[$NonProficiencyAdj][PROF]+[$UserEnteredAttackAdj][USER]+[$MiscAttackAdj][MISC]+[$TwoWeapon][2WEAP]+[$BackstabAttackAdj][REAR]+[$BackstabAttackAdjSurprised][BSTAB][&AttackMods]
   --=AdjustedDamageRoll|[$DamageRoll]*[$BackstabMultiplierDieOnly]+[$StrengthDamageAdj][STR]+[$DMGAdj][DMG]+[$MagicAdj][MAGIC]+[$UserEnteredDamageAdj][USER]+[$MiscDamageAdj][MISC][&DamageMods]*[$BackstabMultiplierAll]
   --=AttackRollNeededwHover|[$AttackRollNeeded][NEEDED TO HIT]
-  --&WeaponDataRowText|[b]Speed[/b] [*R:weapon_speed]   [b]Length[/b] [*R:weapon_length] ft.   [b]Space[/b] [*R:weapon_space]
+  --&WeaponDataRowText|[b]Speed[/b] [*R:weapon_speed] &nbsp; [b]Length[/b] [*R:weapon_length] ft. &nbsp; [b]Space[/b] [*R:weapon_space]
   --&BackstabText|[b][#f00]Backstab![/#][/b]
   --^AttackChallenge|
 
   --/|Ranged Touch; Range is just for display; No adjustment is made for range and this assumes there is only 1 value
   --:RangedTouchAttack|
   --&rangeValue|[*R:weapon_range]
-  --~rawRange|distance;@{selected|token_id};[¶ms3]
+  --~rawRange|distance;@{selected|token_id};[&params3]
   --=rangeFeet|[$rawRange] * 5
   --~|array;fromstring;ranges;/;[&rangeValue]
   --?[$rangeFeet] -gt [@ranges(0)]|FORCE_OUT_OF_RANGE
@@ -410,8 +410,8 @@
       --?"[&RangeCategory]" -inc Long|=RangeAdj;-5
       --?"[&RangeCategory]" -inc Long|&LongIndicator;>
   --:SkipAskforRange|
-  
-  --~rawRange|distance;@{selected|token_id};[¶ms3]
+
+  --~rawRange|distance;@{selected|token_id};[&params3]
   --=rangeFeet|[$rawRange] * 5
   --&rangeByName|Out of Range
   --?[$rangeFeet] -le [$RangedLong]|&rangeByName;Long
@@ -425,7 +425,7 @@
   --?"[&rangeByName]" -eq "Short"|=RangeAdj;0
   --?"[&rangeByName]" -eq "Short"|&ShortIndicator;>
 
-  --&WeaponDataRowText|[b][&ShortIndicator]Short[/b] [@ranges(0)] / [b][&MedIndicator]Medium[/b] [@ranges(1)] / [b][&LongIndicator]Long[/b] [@ranges(2)]
+  --&WeaponDataRowText|[b][&ShortIndicator]Short[/b] [@ranges(0)]&nbsp;/&nbsp;[b][&MedIndicator]Medium[/b] [@ranges(1)]&nbsp;/&nbsp;[b][&LongIndicator]Long[/b] [@ranges(2)]
 
   --?"[&rangeByName]" -ne "Out of Range"|SkipOutOfRange
   --:FORCE_OUT_OF_RANGE|
@@ -489,12 +489,12 @@
 
   --/|Apply Damage to Token
   --?[&ApplyDamagetoToken] -ninc ON|SkipDeadX
-     --!t:[¶ms3]|bar[&HitPointBar]_value:-=[$AdjustedDamageRoll]
+     --!t:[&params3]|bar[&HitPointBar]_value:-=[$AdjustedDamageRoll]
      --&RemainingHP|[*T:t-bar[&HitPointBar]_value]
      --?[&RemainingHP] -le 0|DeadX
   --^SkipDeadX|
   --:DeadX|
-     --@token-mod|_ignore-selected _ids [¶ms3] _set statusmarkers|dead
+     --@token-mod|_ignore-selected _ids [&params3] _set statusmarkers|dead
   --:SkipDeadX|
   --^PrintCard|
 
@@ -544,7 +544,7 @@
   --/|Attack Card
 
   --?[$AttackCounter] -ne 1|SKIP_ATTACK_COUNTER_DISPLAY
-  --?[¶ms2] -eq 1|SKIP_ATTACK_COUNTER_DISPLAY
+  --?[&params2] -eq 1|SKIP_ATTACK_COUNTER_DISPLAY
 
   --+|[t [&tStyle1]][&TextRowCenter]Attack #[$AttackCounter.Raw][&EndRow][/t]
 
@@ -580,5 +580,5 @@
 
   --X|
   --/|End Script
-  
+
   }}
