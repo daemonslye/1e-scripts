@@ -1,32 +1,36 @@
 !script {{
 
+--/|Script Name: 1e-Attack-Menu
+
+--/|Version: 2022.09.19.001
+
+--/|SETTINGS SECTION
+--/|==============================================================================================================
+
+  --/|Armor Rating Adjustments; You can also turn off AR on the character sheet or set Weapon Adjustments to 0 (the default).
+  --&ARSetting|ON
+
   --/|Token Bar Settings; The script *requires* all three data values (if &ARSetting is ON).
   --&HitPointBar|1
   --&ArmorRatingBar|2
   --&ArmorClassBar|3
 
-  --/|Armor Rating Adjustments; You can also turn off AR on the character sheet
-  --&ARSetting|ON
-
-  --/|User StatusMarker Adjustments
-  --/|    If set to ON, will look for statusmarkers on selected & target tokens
-  --/|    The the script will look for a sheet called 1e-attack-database
-  --/|    Attributes will be searched for <statusmarkername>_attack and
-  --/|    <statusmarkername>_damage. Any value in the field will be added to the
-  --/|    rolls if the MAX value lists S or T (for Selected or Target).
+  --/|StatusMarker Adjustments
+  --/|If set to ON, will look for statusmarkers on selected & target tokens to match against the database sheet.
+  --&DatabaseSheetID|@{1e-attack-database|character_id}
   --&UseStatuses|ON
+
+  --/|Ranged Weapon Settings
+  --&AskforRange|OFF
+  --&Auto_Range_Finder|ON
+  --&DecrementAmmo|ON
+  --&AmmoSaveSetting|ON
+
+  --/|Automatically set Dwarf and Gnome AC bonuses against large giant types (note. this includes bugbears, ettins, and gnolls)
+  --&AutoACBonus_DwarfandGnome|ON
 
   --/|Weapon Description Text; If you want the weapon's desc text to print, set to ON
   --&WeapDescText|ON
-
-  --/|Query for Range for Missile Weapons; If ON, a SET RANGE button is generated
-  --&AskforRange|OFF
-
-  --/|Decrement Ammo; This setting will reduce ammo by 1 for each missile attack
-  --&DecrementAmmo|ON
-
-  --/|Ammo Saves; If you want to whisper ammo saves to the GM, set to ON
-  --&AmmoSaveSetting|ON
 
   --/|Backstab Damage Setting; ON will multiply all damage done rather than just the weapon die
   --&BackstabMultiplyAll|ON
@@ -34,20 +38,9 @@
   --/|Apply Damage to Token; If ON, will automatically deduct damage on the target token.
   --&ApplyDamagetoToken|ON
 
-  --/|END SETTINGS
-  --/|=========================================================================================================
+  --/|FORMATTING SECTION
+  --/|==============================================================================================================
 
-  --#whisper|self
-
-  --#reentrant|AD&D1E_Attack_Menu_@{selected|character_id}
-
-  --/|TOKENS (blank if not using)
-    --#sourceToken|@{selected|token_id}
-    --&SelectedId|[*S:character_id]
-
-    --#title|@{selected|token_name}'s Weapons Menu
-
-  --/|FORMATTING
     --#hideTitleCard|0
 
     --#titleFontColor|#000000;
@@ -71,41 +64,47 @@
     --#bodyFontFace|Tahoma
     --#bodyFontSize|14px
 
+    --#emoteBackground|#f2f2f3
+    --#emoteFont|"Contrail One"
+    --#emoteFontColor|#4d1635
+    --#emoteFontWeight|regular
+    --#emoteFontSize|16px
+
   --/|BUTTON FORMAT (seems to work best with sheetbutton or rbutton)
     --#buttonBackground|#4d1635
     --#buttonFontFace|Tahoma
     --#buttonFontSize|14px
 
-    --/|TABLE STYLES
-      --/|ROW COLORS
-        --&Even|#ffffff;
-        --&Odd|#f3f3f3;
-        --&Green|#0BDA51;
-        --&Red|#FAA0A0;
-        --&Yellow|#FFEA00;
+  --/|TABLE STYLES
+    --/|ROW COLORS
+      --&Even|#ffffff;
+      --&Odd|#f3f3f3;
+      --&Green|#0BDA51;
+      --&Red|#FAA0A0;
+      --&Yellow|#FFEA00;
 
-    --/|1ST ROW STYLES (after card title; adds a dotted line)
+  --/|1ST ROW STYLES (after card title; adds a dotted line)
       --&trStyle1st|style="background-color:[&Odd]"
       --&tdStyle1st|style="border-top: 2px dotted #808080;text-align:left;vertical-align:middle;padding: 5px 1px 5px 5px;"
 
-    --/|TABLE STYLE
+  --/|TABLE STYLE
       --&tStyle1|style="width:100%;padding:1px;border-collapse:collapse;"
 
-    --/|ROW STYLES
+  --/|ROW STYLES
       --&trStyleEven|style="background-color:[&Even]border-bottom: 2px solid white;"
       --&trStyleOdd|style="background-color:[&Odd]border-bottom: 2px solid white;"
       --&trStyleRed|style="background-color:[&Red]border-bottom: 2px solid white;"
       --&trStyleGreen|style="background-color:[&Green]border-bottom: 2px solid white;"
 
-    --/|DATA CELL STYLES
+  --/|DATA CELL STYLES
       --&tdStyleLeft|style="text-align:left;vertical-align:middle;padding: 5px 5px 5px 5px;"
       --&tdStyleCenter|style="font-weight:bold;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
       --&tdStyleData|style="font-size:80%;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
-      --/|TWO COLUMN FORMAT (commonly used for buttons: text=left; buttons=right)
+  --/|TWO COLUMN FORMAT (commonly used for buttons: text=left; buttons=right)
         --&tdStyleButtonLeft|style="font-family:Tahoma;font-weight:regular;font-size:100%;width:50%;align:left;valign:middle;padding-left:5px"
         --&tdStyleButtonRight|style="width:50%;align:right;valign:middle;"
 
-    --/|ROW FORMATTING VARIABLES
+  --/|ROW FORMATTING VARIABLES
       --&EndRow|[/td][/tr]
       --&1stRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyle1st]]
       --&RedCenter|[t [&tStyle1]][tr [&trStyleRed]][td [&tdStyleCenter]]
@@ -116,7 +115,22 @@
       --&TextRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleCenter]]
       --&LeftButtonRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyleButtonLeft]]
 
-  --/|Check for multiple token
+--/|SCRIPT SECTION
+--/|==============================================================================================================
+
+--#reentrant|1e_Attack_Menu_@{selected|character_id}
+
+--/|Whisper Menu
+
+  --#whisper|self
+  --#title|@{selected|token_name}'s Weapons Menu
+  --#emoteState|invisible
+
+--/|TOKENS
+  --#sourceToken|@{selected|token_id}
+  --&SelectedId|[*S:character_id]
+
+--/|Check for multiple selected tokens; reuses OutofAmmoChatCard to print errors
   --=AttackerCount|1
   --~SelToken|array;getfirst;SC_SelectedTokens
   --~SelToken|array;getnext;SC_SelectedTokens
@@ -139,6 +153,9 @@
   --X|
 
   --:SKIP_MULTI_TOKEN_CHECK|
+
+--/|GENERATE MENU BUTTONS
+
   --&SelectedID|[*S:character_id]
   --Rfirst|@{selected|character_id};repeating_weapon
   --=Count|1
@@ -154,15 +171,17 @@
   --]|
   --X|
 
-  --/|******************************************************************************************************************
-  --/|******************************************************************************************************************
-  --/|******************************************************************************************************************
+--/|BEGIN ATTACK SCRIPT
 
-  --/|Weapon Attack Script
   --:PERFORM_WEAPON_ATTACK| Reentrant Point
+
+  --/|Turn off whisper
   --#whisper|
 
+--/|USE BUTTON VALUES
+
   --/|Split the reentryval parameters into an array
+
   --/|1=Weapon Slot, 2=Number of Attackers, 3=Target Token ID, 4=User Attack Adj, 5=User Damage Adj, 6=User AC Adj
   --~params|string;split;|;[&reentryval]
 
@@ -199,92 +218,49 @@
   --=AttacksTotalCount|[&params2] * [$AttackMultiplier.Raw] {MIN:1}
   --=AttackCounter|1
 
-  --/|Tokens (blank if not using)
+--/|RANGED WEAPON AUTO RANGE PRE-CHECK
+  --?[&Auto_Range_Finder] -ninc ON|SKIP_RANGE_PRECHECK
+  --?"X[*R:weapon_attack_type]" -eq "X0" -or "X[*R:weapon_attack_type]" -eq "X2"|SKIP_RANGE_PRECHECK
+  --?[&params2] -eq 1|SKIP_RANGE_PRECHECK
+
+  --/|Pre-check ranges for multiple attackers in case one is out of range.
+  --?"X[*R:weapon_attack_type]" -eq "X3"|&rangeValue;[*R:weapon_range]
+  --?"X[*R:weapon_attack_type]" -eq "X3"|SKIP_MISSILE_RANGE
+  --~|array;fromstring;ranges;/;[*R:weapon_range]
+  --&rangeValue|[@ranges(0)]
+  --?"[@ranges(1)]" -gt [&rangeValue]|&rangeValue;[@ranges(1)]
+  --?"[@ranges(2)]" -gt [&rangeValue]|&rangeValue;[@ranges(2)]
+  --:SKIP_MISSILE_RANGE|
+
+  --%loop|0;[@SC_SelectedTokens(maxindex)]
+    --~rawRange|distance;[@SC_SelectedTokens([&loop])];[&params3]
+    --=rangeFeet|[$rawRange] * 5
+    --?[$rangeFeet] -le [&rangeValue]|THIS_RANGE_IS_OK
+    --&OutofAmmo|One or more of the selected creatures is out of range for that weapon!
+    --^PrintCard|
+    --:THIS_RANGE_IS_OK|
+  --%|
+  --:SKIP_RANGE_PRECHECK|
+
+
+--/|TOKENS AFTER MULTI-TOKEN CHECK
   --#sourceToken|@{selected|token_id}
   --#targetToken|[&params3]
 
-  --/|Formatting
+--/|PRINT CARD SETUP
   --#title|[&WeaponName]
   --#leftsub|[&WeaponType]
   --#rightsub|[&DamageType]
-
-  --#hideTitleCard|0
-  --#titleFontColor|#000000;
-  --#titleCardBackground|#ffffff;
-  --#titlefontshadow|;
-  --#titleFontLineHeight|1.5em;
-  --#subtitleFontFace|"Contrail One";
-  --#subtitleFontSize|12px
-  --#subtitleFontColor|#000000;
-  --#tableBorderRadius|4px;
-  --#tableborder|2px solid #808080;
-  --#tableShadow|0
-
-  --/|Min/Max Indicator; If 0, will produce colored numbers
-  --#nominmaxhighlight|0
-
-  --#evenRowBackground|#eeeeee;
-  --#oddRowBackground|#ffffff;
-  --#bodyFontFace|Tahoma
-  --#bodyFontSize|14px
-
   --#emoteText|[*S:t-name] attacks [*T:t-name]
   --#emoteState|visible
-  --#emoteBackground|#f2f2f3
-  --#emoteFont|"Contrail One"
-  --#emoteFontColor|#4d1635
-  --#emoteFontWeight|regular
-  --#emoteFontSize|16px
 
-  --/|Button Format
-  --#buttonBackground|#4d1635
-  --#buttonFontFace|Tahoma
-  --#buttonFontSize|16px
-
-  --/|Table Styles; Used in the Attack Card
-  --/|Row Colors
-  --&Even|#ffffff;
-  --&Odd|#f3f3f3;
-  --&Green|#0BDA51;
-  --&Red|#FAA0A0;
-  --&Yellow|#FFEA00;
-
-  --/|First Row; after card title; adds a dotted line
-  --&trStyle1st|style="background-color:[&Odd]"
-  --&tdStyle1st|style="border-top: 2px dotted #808080;text-align:left;vertical-align:middle;padding: 5px 1px 5px 5px;"
-
-  --/|Table Style
-  --&tStyle1|style="width:100%;padding:1px;border-collapse:collapse;"
-
-  --/|Row Styles
-  --&trStyleEven|style="background-color:[&Even]border-bottom: 2px solid white;"
-  --&trStyleOdd|style="background-color:[&Odd]border-bottom: 2px solid white;"
-  --&trStyleRed|style="background-color:[&Red]border-bottom: 2px solid white;"
-  --&trStyleGreen|style="background-color:[&Green]border-bottom: 2px solid white;"
-
-  --/|Data Cell Styles
-  --&tdStyleLeft|style="text-align:left;vertical-align:middle;padding: 5px 5px 5px 5px;"
-  --&tdStyleCenter|style="font-weight:bold;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
-  --&tdStyleData|style="font-size:80%;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
-  --/|Two-Column Format; Commonly used for buttons: text=left; buttons=right
-  --&tdStyleButtonLeft|style="font-family:Tahoma;font-weight:bold;font-size:100%;width:50%;align:left;valign:middle;padding-left:5px"
-  --&tdStyleButtonRight|style="width:50%;align:right;valign:middle;"
-
-  --/|Row Formatting Variables
-  --&EndRow|[/td][/tr]
-  --&1stRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyle1st]]
-  --&RedCenter|[t [&tStyle1]][tr [&trStyleRed]][td [&tdStyleCenter]]
-  --&GreenCenter|[t [&tStyle1]][tr [&trStyleGreen]][td [&tdStyleCenter]]
-  --&LeftRowEven|[t [&tStyle1]][tr [&trStyleEven]][td [&tdStyleLeft]]
-  --&LeftRowOdd|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleLeft]]
-  --&DataRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleData]]
-  --&TextRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleCenter]]
-
-  --/|Character IDs
+--/|Character IDs
   --&SelectedId|[*S:character_id]
   --&TargetedId|[*T:character_id]
 
-  --/|Target Touch AC; Used for Touch or Ranged Touch Attack Types.
+--/|TARGET ARMOR CLASS
+
+--/|Target Touch AC; Used for Touch or Ranged Touch Attack Types.
   --=ACTotalMagicAdj|
   --=ACTotalMagicAdj|+[*[&TargetedId]:armorclass_magic_with_shield]
   --=ACTotalMiscAdj|
@@ -308,6 +284,7 @@
 
   --/|Armor Rating Adjustments; If ignore AR is checked, the "-" is read as a 0 adjustment. Otherwise if ARSetting is OFF, the adjustment is ignored for every attack.
   --=TargetBaseAC|[*T:t-bar[&ArmorClassBar]_value]
+
   --?"X[*R:weapon_backstab_flag]" -eq X|SkipBackstabACAdj
   --?"[*R:weapon_backstab_flag]" -eq 0|SkipBackstabACAdj
       --=TargetBaseAC|[*[&TargetedId]:armorclass_rear][REAR]
@@ -315,10 +292,18 @@
       --=ArmorRatingAdjustment|[*R:weapon_thac_adj[&TargetADString]]
       --?[&ARSetting] -inc OFF|SetACwNoArmorRating
       --=TargetAC|[$TargetBaseAC]-[$ArmorRatingAdjustment][AR_ADJ]-[$UserEnteredTargetACAdj][USER] {MAX:10}
+
   --^SkipTurnOffArmorRating|
   --:SetACwNoArmorRating|
       --=TargetAC|[$TargetBaseAC]-[$UserEnteredTargetACAdj][USER] {MAX:10}
+
   --:SkipTurnOffArmorRating|
+
+  --=FinalTargetAC|[$TargetAC]
+
+  --=FinalTargetTouchAC|[$TargetTouchAC]
+
+--/|BUILT IN ATTACK, DAMAGE, and AC BONUSES
 
   --/|Racial Hatred and Class Bonuses;
   --/|Ranger Check
@@ -334,14 +319,29 @@
   --?"X[*[&SelectedId]:thirdclass]" -inc Ranger|=RangerDamageAdj;[*[&SelectedId]:[%1%]]
   --:SkipRangerDamageBonus|
 
-  --/|Dwarf and Gnome Checks
+  --/|Dwarf and Gnome Hatred Checks
   --?"X[*[&SelectedId]:race]" -inc dwarf|>CheckforHatred;orc
-  --?"X[*[&SelectedId]:race]" -inc gnome|CheckforHatred;kobold
+  --?"X[*[&SelectedId]:race]" -inc gnome -and "X[*[&TargetedId]:race]" -inc kobold|=HatredAttackAdj;1
   --^SkipHatredCheck|
   --:CheckforHatred|
   --?"X[*[&TargetedId]:race]" -inc goblin|=HatredAttackAdj;1
   --?"X[*[&TargetedId]:race]" -inc [%1%]|=HatredAttackAdj;1
   --:SkipHatredCheck|
+
+  --/|Dwarf and Gnome AC Checks; Note that this gives them their bonus against bugbears and gnolls.
+  --?[&AutoACBonus_DwarfandGnome] -inc OFF|Skip_AutoACBonus_DwarfandGnome
+  --=GiantFighter_ACBonus|0
+  --?"X[*[&TargetedId]:race]" -inc dwarf|CheckForLargeGiant
+  --?"X[*[&TargetedId]:race]" -inc gnome|CheckForLargeGiant
+  --^Skip_AutoACBonus_DwarfandGnome|
+
+  --:CheckForLargeGiant|
+  --?"X[*[&SelectedId]:race]" -inc giant -and "X[*[&SelectedId]:size2]" -inc L|=GiantFighter_ACBonus;-4
+
+  --=FinalTargetAC|[$TargetAC] + [$GiantFighter_ACBonus]
+  --=FinalTargetTouchAC|[$TargetTouchAC] + [$GiantFighter_ACBonus]
+
+  --:Skip_AutoACBonus_DwarfandGnome|
 
   --/|Add Up Misc Adjustments
   --=MiscAttackAdj|0+[$HatredAttackAdj]
@@ -352,40 +352,160 @@
   --&DescRowText|
   --&DamageRowText|
 
-  --/|StatusMarkers
+--/|STATUSMARKER ADJUSTMENTS
+
   --?[&UseStatuses] -inc OFF|SkipStatusChecks
-     --/|General Initialization
-     --&DatabaseSheetID|@{1e-attack-database|character_id}
+
+  --/|GET SHEET ATTRIBUTES
+
+    --/|DEXTERITY
+        --=DEX_AC|0
+        --=CHARGE_AC|1
+        --?"X[*[&TargetedId]:armorbonus_toggle]" -ne X1|SkipDexAC_Check
+        --=DEX_AC|[*[&TargetedId]:armorbonus] {NEGATE}
+        --?[$DEX_AC] -gt 1|=CHARGE_AC;[$DEX_AC]
+
+        --:SkipDexAC_Check|
+
+    --/|SHIELD
+        --=SHIELD_AC|0
+        --?"X[*[&TargetedId]:armorshield_worn]" -ne X1|SkipShieldAC_Check
+        --=SHIELD_AC|[*[&TargetedId]:armorclass_combined_shield_mod_magic] {NEGATE}
+
+        --:SkipShieldAC_Check|
+
      --/|Get the markers on the source and target characters
      --~|array;statusmarkers;sourceMarkers;@{selected|token_id}
      --~|array;statusmarkers;targetMarkers;[&params3]
+
      --/|Initialize the modifier strings to empty
      --&AttackMods|
      --&DamageMods|
+     --&ACMods|
 
-     --/|Loop through markers on the Source character
+     --/|Loop through markers on the SOURCE/SELECTED token
+
      --%loop|0;[@sourceMarkers()]
         --&Marker|[@sourceMarkers([&loop])]
         --?"X[&Marker]" -eq "X"|SkipSourceMarker
+
+
+    --/|SET TARGET BASE AC MODIFIERS DUE TO SOURCE STATUSMARKERS
+
+    --?"X[*[&DatabaseSheetID]:[&Marker]_ac]" -eq "Xundefined"|SkipSourceACMarker
+
+        --&PartyAC|[*[&DatabaseSheetID]:[&Marker]_ac^]
+        --&ArmorClass|[*[&DatabaseSheetID]:[&Marker]_ac]
+        --?"X[&PartyAC]" -ne "XS"|SkipSourceACMarker
+        --?"X[&ArmorClass]" -ne "Xundefined"|&ACMods;+ + [&ArmorClass] {[&Marker]}
+      --:SkipSourceACMarker|
+
+    --/|SET SOURCE ATTACK & DAMAGE MODIFIERS DUE TO SOURCE STATUSMARKERS
+
+    --?"X[*[&DatabaseSheetID]:[&Marker]_attack]" -eq "Xundefined"|SkipSourceMarker
+
         --&Party|[*[&DatabaseSheetID]:[&Marker]_attack^]
         --&Attack|[*[&DatabaseSheetID]:[&Marker]_attack]
-        --&Damage|[*[&DatabaseSheetID]:[&Marker]_damage]
+
         --?"X[&Party]" -ne "XS"|SkipSourceMarker
         --?"X[&Attack]" -ne "Xundefined"|&AttackMods;+ + [&Attack] {[&Marker]}
+
+        --?"X[*[&DatabaseSheetID]:[&Marker]_damage]" -eq "Xundefined"|SkipSourceMarker
+
+        --&Damage|[*[&DatabaseSheetID]:[&Marker]_damage]
         --?"X[&Damage]" -ne "Xundefined"|&DamageMods;+ + [&Damage] {[&Marker]}
+
      --:SkipSourceMarker|
      --%|
 
      --/|Loop through markers on the Target character
+
+     --/|Set Target Counters
+
+     --=DEX_COUNTER|1
+     --=SHIELD_COUNTER|1
+
      --%loop|0;[@targetMarkers()]
         --&Marker|[@targetMarkers([&loop])]
+
         --?"X[&Marker]" -eq "X"|SkipTargetMarker
+
+
+
+    --/|SET TARGET AC MODIFIERS DUE TO TARGET STATUSMARKERS
+    --/|If using _dex or _shield you must include an _ac marker value of at least 0
+
+    --?"X[*[&DatabaseSheetID]:[&Marker]_ac]" -eq "Xundefined"|SkipTargetACMarker
+
+        --&PartyAC|[*[&DatabaseSheetID]:[&Marker]_ac^]
+        --&ArmorClass|[*[&DatabaseSheetID]:[&Marker]_ac]
+
+        --/|Check for Multiple Conditions Affecting Dex
+
+        --/|Charging is special so check for it first
+        --?"[&Marker]" -ninc "charging"|FINISH_CHARGE_CHECK
+        --?[$DEX_COUNTER] -gt 1|SET_CHARGE_TO_0
+        --?[$DEX_AC] -lt 2|SET_CHARGE_TO_1
+        --?"X[*[&TargetedId]:sync_ac_flag]" -ne "X1"|SET_CHARGE_TO_1
+
+        --=DEX_COUNTER|[$DEX_COUNTER] + 1
+        --&DEX_AC2|[*[&TargetedId]:armorbonus]
+        --?[$DEX_AC] -gt 1|&ArmorClass;+ + [&DEX_AC2(replace,-,)]
+        --^FINISH_CHARGE_CHECK|
+        --:SET_CHARGE_TO_1|
+
+        --&ArmorClass|+ + 1
+        --^FINISH_CHARGE_CHECK|
+        --:SET_CHARGE_TO_0|
+
+        --&ArmorClass|+ + 0
+        --:FINISH_CHARGE_CHECK|
+
+        --?"X[*[&DatabaseSheetID]:[&Marker]_dex]" -eq "Xundefined"|SkipTargetDexMarker
+        --?"[*[&DatabaseSheetID]:[&Marker]_dex]" -ne "dex"|SkipTargetDexMarker
+        --?[$DEX_COUNTER] -gt 1|SkipTargetDexMarker
+        --?[$DEX_AC] -lt 1|SkipTargetDexMarker
+
+        --=DEX_COUNTER|[$DEX_COUNTER] + 1
+        --&DEX_AC2|[*[&TargetedId]:armorbonus]
+        --&ArmorClass|+ + [&DEX_AC2(replace,-,)]
+
+
+
+        --:SkipTargetDexMarker|
+
+        --/|Check for Multiple Conditions Affecting Shield
+        --?"X[*[&DatabaseSheetID]:[&Marker]_shield]" -eq "Xundefined"|SkipTargetShieldMarker
+        --?"[*[&DatabaseSheetID]:[&Marker]_shield]" -ne "shield"|SkipTargetShieldMarker
+        --?[$SHIELD_COUNTER] -gt 1|SkipTargetShieldMarker
+
+        --=SHIELD_COUNTER|[$SHIELD_COUNTER] + 1
+
+        --&SHIELD_AC2|[*[&TargetedId]:armorclass_combined_shield_mod_magic]
+        --&ArmorClass|+ + [&SHIELD_AC2(replace,-,)]
+
+
+
+        --:SkipTargetShieldMarker|
+
+        --?"X[&PartyAC]" -ne "XT"|SkipTargetACMarker
+        --?"X[&ArmorClass]" -ne "Xundefined"|&ACMods;+ + [&ArmorClass] {[&Marker]}
+
+    --:SkipTargetACMarker|
+
+    --/|SET TARGET ATTACK & DAMAGE MODIFIERS DUE TO STATUSMARKER
+    --?"X[*[&DatabaseSheetID]:[&Marker]_attack]" -eq "Xundefined"|SkipTargetMarker
+
         --&Party|[*[&DatabaseSheetID]:[&Marker]_attack^]
         --&Attack|[*[&DatabaseSheetID]:[&Marker]_attack]
-        --&Damage|[*[&DatabaseSheetID]:[&Marker]_damage]
+
         --?"X[&Party]" -ne "XT"|SkipTargetMarker
         --?"X[&Attack]" -ne "Xundefined"|&AttackMods;+ + [&Attack] {[&Marker]}
+
+        --?"X[*[&DatabaseSheetID]:[&Marker]_damage]" -eq "Xundefined"|SkipTargetMarker
+        --&Damage|[*[&DatabaseSheetID]:[&Marker]_damage]
         --?"X[&Damage]" -ne "Xundefined"|&DamageMods;+ + [&Damage] {[&Marker]}
+
      --:SkipTargetMarker|
      --%|
 
@@ -396,6 +516,16 @@
      --~DamageMods|string;replaceall;+ -;-;[&DamageMods]
      --~DamageMods|string;replaceall;{;[;[&DamageMods]
      --~DamageMods|string;replaceall;};];[&DamageMods]
+
+     --~ACMods|string;replaceall;+ -;-;[&ACMods]
+     --~ACMods|string;replaceall;{;[;[&ACMods]
+     --~ACMods|string;replaceall;};];[&ACMods]
+
+
+     --=TargetAC|[$FinalTargetAC] + [&ACMods] {MAX:10}
+
+
+     --=TargetTouchAC|[$FinalTargetTouchAC] + [&ACMods] {MAX:10}
 
   --:SkipStatusChecks|
 
@@ -409,6 +539,14 @@
   --:SkipTwo-Weapon|
 
   --/|Attack Roll Needed
+  --=BOULDER_DEX|[*T:armorbonus] {NEGATE}
+
+  --?"[&WeaponName]" -inc "Boulder" -and [$BOULDER_DEX] -gt 0 -and [$DEX_COUNTER] -lt 2|[
+      --=TargetAC|[$TargetAC] + [$BOULDER_DEX] {MAX:10}
+
+      --]|
+
+  --?[$TargetAC] -lt -10|=TargetAC;-10
   --=AttackRollNeeded|[*[&SelectedId]:thac[$TargetAC]]
   --=TouchAttackRollNeeded|[*[&SelectedId]:thac[$TargetTouchAC]]
 
@@ -477,7 +615,8 @@
   --/|Ranged Touch; Range is just for display; No adjustment is made for range and this assumes there is only 1 value
   --:RangedTouchAttack|
   --&rangeValue|[*R:weapon_range]
-  --~rawRange|distance;@{selected|token_id};[&params3]
+  --=TokenLookup|[$AttackCounter] / [$AttackMultiplier] {CEIL} - 1 {MIN:0}
+  --~rawRange|distance;[@SC_SelectedTokens([$TokenLookup.Raw])];[&params3]
   --=rangeFeet|[$rawRange] * 5
   --~|array;fromstring;ranges;/;[&rangeValue]
   --?[$rangeFeet] -gt [@ranges(0)]|FORCE_OUT_OF_RANGE
@@ -503,6 +642,10 @@
       --=RangedMedium|[@ranges(1)]
       --=RangedLong|[@ranges(2)]
 
+  --&ShortIndicator|
+  --&MedIndicator|
+  --&LongIndicator|
+
   --?[&AskforRange] -ninc ON|SkipAskforRange
       --ISELECT RANGE CATEGORY ;Set Range|q;RangeCategory;Range Category|Short [@ranges(0)]|Medium [@ranges(1)]|Long [@ranges(2)]
       --?"[&RangeCategory]" -inc Short|&ShortIndicator;>
@@ -512,7 +655,10 @@
       --?"[&RangeCategory]" -inc Long|&LongIndicator;>
   --:SkipAskforRange|
 
-  --~rawRange|distance;@{selected|token_id};[&params3]
+  --:Auto_Set_Range|
+  --?[&Auto_Range_Finder] -ninc ON|Skip_Auto_Set_Range
+  --=TokenLookup|[$AttackCounter] / [$AttackMultiplier] {CEIL} - 1 {MIN:0}
+  --~rawRange|distance;[@SC_SelectedTokens([$TokenLookup.Raw])];[&params3]
   --=rangeFeet|[$rawRange] * 5
   --&rangeByName|Out of Range
   --?[$rangeFeet] -le [$RangedLong]|&rangeByName;Long
@@ -534,6 +680,7 @@
   --^PrintCard|
 
   --:SkipOutOfRange|
+  --:Skip_Auto_Set_Range|
 
   --/|Subtract Ammo; If the player puts an X in the weapon's Qty field, ammo will not decrement. Change to OFF in Settings above.
   --?[&DecrementAmmo] -ninc ON|SkipSubtractAmmo
