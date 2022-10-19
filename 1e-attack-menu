@@ -2,7 +2,7 @@
 
 --/|Script Name: 1e-Attack-Menu
 
---/|Version: 2022.09.19.001
+--/|Version: 2022.10.19.001
 
 --/|SETTINGS SECTION
 --/|==============================================================================================================
@@ -375,7 +375,31 @@
         --:SkipShieldAC_Check|
 
      --/|Get the markers on the source and target characters
-     --~|array;statusmarkers;sourceMarkers;@{selected|token_id}
+
+-->FIND_BUMP_MASTER_TOKEN|@{selected|token_id};realtoken
+--?"X[&realtoken]" -eq X|SkipBump
+--&SelectedTokenID|[&realtoken]
+--^SkipNonBumpSet|
+
+--:FIND_BUMP_MASTER_TOKEN|TokenID of Slave Token;Return var
+ --~work|string;replaceall;",";"&&&";[*G:Bump:mirrored]
+ --~work|string;stripchars;{}";[&work]
+ --~|array;fromstring;workarray;&&&;[&work]
+
+ --&searchVal|[%1%]
+ --&[%2%]|
+ --%loop|foreach;workarray
+   --?"[&loop]" -ninc "[&searchVal]"|%
+   --~[%2%]|string;before;:;[&loop]
+
+ --%|
+ --<|
+
+--:SkipBump|
+--&SelectedTokenID|@{selected|token_id}
+--:SkipNonBumpSet|
+
+     --~|array;statusmarkers;sourceMarkers;[&SelectedTokenID]
      --~|array;statusmarkers;targetMarkers;[&params3]
 
      --/|Initialize the modifier strings to empty
@@ -699,6 +723,7 @@
      --!a:[&SelectedId]|[*R>weapon_ammo]:-=1
 
   --/|Ammo Saves; Set to OFF in SETTINGS above
+  --?"[&WeaponName]" -ninc bow|SkipAmmoSaves
   --?[&AmmoSaveSetting] -ne ON|SkipAmmoSaves
      --=AmmoSave|1d20
      --=MagicArrowSave|1d100
