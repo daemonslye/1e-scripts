@@ -1,0 +1,158 @@
+!script {{
+  --/|Script Name: Cure-Light-Wounds-Scroll
+  --/|Location: ItemScripts
+  --/|Scroll name MUST be Cure-Light-Wounds and Ability in AbilityScripts must be named Cure-Light-Wounds
+
+  --/|Note: This is for SCROLL SPELLS only. Spontaneously cast cure spells are found in AbilityScripts and Spells in SpellScripts.
+
+  --/|Version: 2022.11.21.001
+
+  --/|SETTINGS
+  --/|==============================================================================================================
+
+  --&TOKEN_HP_BAR|bar1
+
+  --&SPELL_LINK|[+ DETAILS](https://sites.google.com/view/vile-spells/c-spells/cure-wounds-light-r)
+
+  --/|FORMATTING SECTION
+  --/|==============================================================================================================
+
+  --#overridetemplate|VileDarkness_StandardButtons
+
+  --#emoteText|
+  --#emoteState|visible
+  --#emoteBackground|#f2f2f3
+  --#emoteFont|"Contrail One"
+  --#emoteFontColor|#4d1635
+  --#emoteFontWeight|regular
+  --#emoteFontSize|16px
+
+--/|BUTTON FORMAT (seems to work best with sheetbutton or rbutton)
+  --#buttonBackground|#4d1635
+  --#buttonFontFace|Tahoma
+  --#buttonFontSize|14px
+
+--/|SCRIPT
+--/|==============================================================================================================
+
+--&SpellName|Cure-Light-Wounds
+
+--#sourceToken|@{selected|token_id}
+--#targetToken|@{target|token_id}
+
+--&CasterId|@{selected|character_id}
+--&SelectedId|[*S:character_id]
+
+--&SourceTokenName|[*S:t-name]
+--&SourceTokenFirstName|[&SourceTokenName(word,1)]
+--&TargetTokenName|[*T:t-name]
+--&TargetTokenFirstName|[&TargetTokenName(word,1)]
+
+--?"[&SourceTokenFirstName]" -eq The|&SourceTokenFirstName;[&SourceTokenName]
+--?"[&TargetTokenFirstName]" -eq The|&TargetTokenFirstName;[&TargetTokenName]
+
+--/|SET CASTER TYPES; Make sure to include all possible caster types for the spell limited to (list w/no spaces and separated by semi-colons): Magic-user;Illusionist;Cleric;Druid
+--&PossibleCasterTypes|Cleric;Druid
+
+-->FIND_CASTER_TYPE_AND_LEVEL|
+
+--/|NOT USED
+--/|CHECK_STATUS_MARKER - TokenID;MarkerToFind;ExistsVariable;CountVariable
+--/|Will check the given token (TokenID) for the status marker (MarkerToFind) and set two return
+--/|string variables: (ExistsVariable) will be 1 if the token has the marker, and (CountVariable)
+--/|will contain the counter number on the marker (default 0 for no number)
+--/|CHECK_STATUS_MARKER|@{target|token_id};[&Aid_Marker];ALREADY_THERE
+
+--/|SPECIFIC SPELL CODE
+--/|==============================================================================================================
+
+--?[&Scroll_Not_Found] -eq 1|SPELLNOTFOUND
+--?[&NO_USES_REMAINING] -eq 1|NO_USES
+
+--?[&CasterType] -inc Druid|=DruidBonus;[$CasterLevel]
+
+--=CureRoll|2d8kh1 + [$DruidBonus][DRUID]
+--=DURATION|
+--=CURRENTHP|[*T:t-[&TOKEN_HP_BAR]_value]
+--=MAXHP|[*T:t-[&TOKEN_HP_BAR]_max]
+--=CURED_HP|[$CURRENTHP] + [$CureRoll] {MAX:[$MAXHP]}
+
+--&FirstLine|Cured from [b][$CURRENTHP.Raw] HP[/b] by [$CureRoll] HP to [b][$CURED_HP.Raw] HP[/b]
+--&SecondLine|[b]LINK:[/b] [&SPELL_LINK]
+--?[&Spell_is_Not_Prepared] -eq 1|SPELL_NOT_PREPARED
+--^PRINTCARD|
+
+--:SPELLNOTFOUND|
+--#emoteText|[*S:t-name] attempts to cast [&SpellName]
+--#title|[&SpellName] Scroll
+--&FirstLine|[h5][c][b]Cannot find [&SpellName] in your Equipment List.[/b][/c]
+--+|[h1][&FirstLine]
+--X|
+
+--:NO_USES|
+--#emoteText|[*S:t-name] attempts to cast [&SpellName]
+--#title|[&SpellName] Scroll
+--&FirstLine|[h5][c][b]This scroll has no uses remaining.[/b][/c]
+--+|[h1][&FirstLine]
+--X|
+
+--:CASTER_LEVEL_ERROR|
+--#emoteText|[*S:t-name] attempts to cast [&SpellName]
+--#title|[&SpellName] Scroll
+--&FirstLine|[h5][c][b]Caster level for the scroll is not set.[/b][/c]
+--+|[h1][&FirstLine]
+--X|
+
+--:PRINTCARD|
+
+--#emoteText|[&SourceTokenFirstName] cures [&TargetTokenFirstName]
+--#title|[&SpellName] Scroll (CL [$CasterLevel.Raw])
+
+--+|[h1][&FirstLine]
+--+|[h2][&SecondLine]
+
+--/|TOKEN & SHEET ACTIONS
+--!t:@{target|token_id}|[&TOKEN_HP_BAR]_value:[$CURED_HP]
+
+--Rfind|[*S:character_id];[&SpellName];repeating_equipment;equipment_item
+--@setattr| _charid [*S:character_id] _mod _[*R>equipment_current]#-1 _silent
+
+--X|
+
+--/|SCRIPT FUNCTIONS
+--/|==============================================================================================================
+
+--:FIND_CASTER_TYPE_AND_LEVEL|
+
+--Rfind|[&SelectedId];[&SpellName];repeating_equipment;equipment_item
+--?"[*R:equipment_item]" -eq NoRepeatingAttributeLoaded|[
+      --&Scroll_Not_Found|1
+      --^Skip_Caster_Checks|
+      --]|
+
+--?[*R:equipment_current] -lt 1|&NO_USES_REMAINING;1
+
+--~|array;define;Possible_Caster_Types;[&PossibleCasterTypes]
+
+--%loop|foreach;Possible_Caster_Types
+
+--?"[*R:equipment_description]" -inc [&loop]|[
+      --&CasterType|[&loop]
+      --%!|
+      --]|
+--%|
+
+--=CasterLevel|[*R:equipment_quantity^]
+--?"X[$CasterLevel]" -eq X|CASTER_LEVEL_ERROR
+--?[$CasterLevel] -lt 1|CASTER_LEVEL_ERROR
+
+--:Skip_Caster_Checks|
+--<|
+
+--:AskForCasterType|
+--i;Enter Caster Level|q;CasterLevel;Select Caster Level|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20||q;CasterType;Select Caster Type for the Spell/Effect|Cleric
+--=CasterLevel|[&CasterLevel]
+--&SkipPreparedCheck|1
+--<|
+
+}}
