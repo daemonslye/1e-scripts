@@ -1,0 +1,250 @@
+!script {{
+
+--/|Script Name: Save-Menu
+--/|Location: CharacterScripts
+
+--/|Version: 2022.11.17.001
+
+--/|SETTINGS SECTION
+--/|==============================================================================================================
+
+--/|StatusMarker Adjustments; These are hardcoded below. Sorry!
+
+--/|FORMATTING SECTION
+--/|==============================================================================================================
+
+  --#overridetemplate|VileDarkness_StandardButtons
+
+  --#emoteBackground|#f2f2f3
+  --#emoteFont|"Contrail One"
+  --#emoteFontColor|#4d1635
+  --#emoteFontWeight|regular
+  --#emoteFontSize|16px
+
+  --/|Button Format
+  --#buttonBackground|#4d1635
+  --#buttonFontFace|Tahoma
+  --#buttonFontSize|14px
+
+  --/|SCRIPT SECTION
+  --/|==============================================================================================================
+
+  --#reentrant|VileDarkness_Save_@{selected|character_id}
+
+  --#sourceToken|@{selected|token_id}
+
+  --=poisonSave|[*S:saveparalysispoisondeath]
+  --=petrifySave|[*S:savepetrificationpolymorph]
+  --=wandSave|[*S:saverodsstaveswands]
+  --=breathSave|[*S:savebreathweapons]
+  --=spellSave|[*S:savespells]
+
+  --=DEX_Mod|[*S:armorbonus] {NEGATE}
+  --=WIS_Mod|[*S:mentalsavebonus]
+
+  --&Race|[*S:race]
+  --?"[&Race]" -inc dwarf|&ConMod;Yes
+  --?"[&Race]" -inc gnome|&ConMod;Yes
+  --?"[&Race]" -inc halfling|&ConMod;Yes
+  --?"[*S:character_name]" -eq Logan|&ConMod;Yes
+  --?[&ConMod] -eq Yes|>CALC_CON_MOD
+
+  --#emoteState|invisible
+  --#whisper|self
+
+  --:Buttons|goto;title;user_mod;button_mod;button_mod_roll_text
+
+  --#title|Save Menu
+
+  --&SaveMenu|
+  [t style="width:100%;padding:1px;border-collapse:collapse;"][tr][td style="border-top: 2px dotted #808080;width:25%;align:left;valign:middle;padding-left:5px"][rbutton]POISON::MAKE_SAVE;poison|Poison|&#63;{Modifier|0}|NA|[NA][/rbutton]    [/td][td style="border-top: 2px dotted #808080;width:75%;padding: 1px 1px 1px 6px;"][rbutton:#ffffff:#585858]DEX::MAKE_SAVE;poison|Poison (Dex)|&#63;{Modifier|0}|DEX|[DEX][/rbutton][rbutton:#ffffff:#585858]WIS::MAKE_SAVE;poison|Poison (Wis)|&#63;{Modifier|0}|WIS|[WIS][/rbutton][rbutton:#ffffff:#585858]RACE::MAKE_SAVE;poison|Poison (Con)|&#63;{Modifier|0}|CON|[CON][/rbutton][rbutton:#ffffff:#585858]AOE::MAKE_SAVE;poison|Poison (AOE)|&#63;{Modifier|0}|AOE|[DEX and ARMOR][/rbutton][/td][/tr][/t]
+  [t style="width:100%;padding:1px;border-collapse:collapse;"][tr][td style="width:25%;align:left;valign:middle;padding-left:5px"][rbutton]PETRIFY::MAKE_SAVE;petrify|Petrify|&#63;{Modifier|0}|NA|NA[/rbutton]          [/td][td style="width:75%;padding: 1px 1px 1px 5px;"][rbutton:#ffffff:#585858]DEX::MAKE_SAVE;petrify|Petrify (Dex)|&#63;{Modifier|0}|DEX|[DEX][/rbutton][rbutton:#ffffff:#585858]WIS::MAKE_SAVE;petrify|Petrify (Wis)|&#63;{Modifier|0}|WIS|[WIS][/rbutton][rbutton:#ffffff:#585858]RACE::MAKE_SAVE;petrify|Petrify (Con)|&#63;{Modifier|0}|CON|[CON][/rbutton][rbutton:#ffffff:#585858]AOE::MAKE_SAVE;petrify|Petrify (AOE)|&#63;{Modifier|0}|AOE|[DEX and ARMOR][/rbutton][/td][/tr][/t]
+  [t style="width:100%;padding:1px;border-collapse:collapse;"][tr][td style="width:25%;align:left;valign:middle;padding-left:5px"][rbutton]WAND::MAKE_SAVE;wand|Wand|&#63;{Modifier|0}|NA|NA[/rbutton]             [/td][td style="width:75%;padding: 1px 1px 1px 13px;"][rbutton:#ffffff:#585858]DEX::MAKE_SAVE;wand|Wand (Dex)|&#63;{Modifier|0}|DEX|[DEX][/rbutton][rbutton:#ffffff:#585858]WIS::MAKE_SAVE;wand|Wand (Wis)|&#63;{Modifier|0}|WIS|[WIS][/rbutton][rbutton:#ffffff:#585858]RACE::MAKE_SAVE;wand|Wand (Con)|&#63;{Modifier|0}|CON|[CON][/rbutton][rbutton:#ffffff:#585858]AOE::MAKE_SAVE;wand|Wand (AOE)|&#63;{Modifier|0}|AOE|[DEX and ARMOR][/rbutton][/td][/tr][/t]
+  [t style="width:100%;padding:1px;border-collapse:collapse;"][tr][td style="width:25%;align:left;valign:middle;padding-left:5px"][rbutton]BREATH::MAKE_SAVE;breath|Breath|&#63;{Modifier|0}|NA|[NA][/rbutton]           [/td][td style="width:75%;padding: 1px 1px 1px 8px;"][rbutton:#ffffff:#585858]DEX::MAKE_SAVE;breath|Breath (Dex)|&#63;{Modifier|0}|DEX|[DEX][/rbutton][rbutton:#ffffff:#585858]WIS::MAKE_SAVE;breath|Breath (Wis)|&#63;{Modifier|0}|WIS|[WIS][/rbutton][rbutton:#ffffff:#585858]RACE::MAKE_SAVE;breath|Breath (Con)|&#63;{Modifier|0}|CON|[CON][/rbutton][rbutton:#ffffff:#585858]AOE::MAKE_SAVE;breath|Breath (AOE)|&#63;{Modifier|0}|AOE|[DEX and ARMOR][/rbutton][/td][/tr][/t]
+  [t style="width:100%;padding:1px;border-collapse:collapse;"][tr][td style="width:25%;align:left;valign:middle;padding-left:5px"][rbutton]SPELL::MAKE_SAVE;spell|Spell|&#63;{Modifier|0}|NA|[NA][/rbutton]            [/td][td style="width:75%;padding: 1px 1px 1px 13px;"][rbutton:#ffffff:#585858]DEX::MAKE_SAVE;spell|Spell (Dex)|&#63;{Modifier|0}|DEX|[DEX][/rbutton][rbutton:#ffffff:#585858]WIS::MAKE_SAVE;spell|Spell (Wis)|&#63;{Modifier|0}|WIS|[WIS][/rbutton][rbutton:#ffffff:#585858]RACE::MAKE_SAVE;spell|Spell (Con)|&#63;{Modifier|0}|CON|[CON][/rbutton][rbutton:#ffffff:#585858]AOE::MAKE_SAVE;spell|Spell (AOE)|&#63;{Modifier|0}|AOE|[DEX and ARMOR][/rbutton][/td][/tr][/t]
+
+    --+|[&SaveMenu]
+    --X|
+
+    --:MAKE_SAVE|
+
+    --&SelectedID|[*S:character_id]
+
+    --~params|string;split;|;[&reentryval]
+
+    --?[&params3] -inc fear|>CHECK_FIGHTER_CLASS|=UserMod;[&params3]
+
+    --?[&params3] -inc dex -and [&params4] -ne DEX|=UserMod;[$DEX_Mod]
+    --?[&params3] -inc wis -and [&params4] -ne WIS|=UserMod;[$WIS_Mod]
+
+    --&SaveType|[&params1]
+    --&SaveName|[&params2]
+    --&AbilityType|[&params4]
+    --&AbilityText|[&params5]
+
+    -->CHECK_STATUSMARKERS|
+
+    --=ArmorBonus|0
+    --=ProtectionBonus|0
+    --?"X[*S:defensive_notes]" -eq X|SkipSetArmorBonus
+    --~|array;fromstring;arbonus;:;[*S:defensive_notes]
+    --=ArmorBonus|[@arbonus(1)]
+    --=ProtectionBonus|[@arbonus(3)]
+    --=ShieldBonus|[*S:armorshield_magic]
+    --?[&SHIELD_CHECK] -eq NONE|=ShieldBonus;0
+    --?[*S:armorshield_worn] -eq 1|=ArmorBonus;[$ArmorBonus] + [$ShieldBonus]
+    --?[$ArmorBonus] -gt [$ProtectionBonus]|=AR_Bonus;[$ArmorBonus] - [$ProtectionBonus]
+    --:SkipSetArmorBonus|
+
+    --?[&AbilityType] -eq AOE|SET_AOE_MODS
+    --?[&AbilityType] -ne NA|[
+        --=ButtonMod|[$[&AbilityType]_Mod]
+    --^Skip_AOE|
+
+    --:SET_AOE_MODS|
+    --=ButtonMod|[$DEX_Mod] + [$AR_Bonus]
+
+    --:Skip_AOE|
+
+
+
+    --=SAVE_ROLL|1d20 + [$ButtonMod] [&AbilityText] + [$UserMod] [USER] + [$FearBonus] [FEAR] + [&SAVEMODS]
+    --=SAVE_DC|[$[&SaveType]Save]
+
+    --:PRINT_CARD|
+        --?[$SAVE_ROLL] -ge [$SAVE_DC]|&Result;Success!|&Result;Failed!
+        --?[$SAVE_ROLL] -eq 1|&Result;Failed!
+        --?[$SAVE_ROLL] -eq 20|&Result;Success!
+
+        --#title|[*S:t-name] Save vs [&SaveName]
+
+        --&FirstLine|Roll: [$SAVE_ROLL] vs [$SAVE_DC]
+
+        --?[&Result] -eq Success!|UseGreen
+        --&ResultLine|[h5][&Result]
+        --^SkipGreen|
+        --:UseGreen|
+        --&ResultLine|[h4][&Result]
+        --:SkipGreen|
+
+        --#whisper|
+
+        --+|[h1][&FirstLine]
+        --+|[&ResultLine]
+        --?"X[&NOTES]" -eq "X"|SkipNotes
+        --+|[&NOTES]
+        --:SkipNotes|
+
+        --X|
+
+    --:CALC_CON_MOD|
+
+    --=Con|[*S:constitution]
+    --=CON_Mod|0
+    --?[$Con] -gt 24|=CON_Mod;7
+    --?[$Con] -gt 20 -and [$Con] -lt 25|=CON_Mod;6
+    --?[$Con] -gt 17 -and [$Con] -lt 21|=CON_Mod;5
+    --?[$Con] -gt 13 -and [$Con] -lt 18|=CON_Mod;4
+    --?[$Con] -gt 10 -and [$Con] -lt 14|=CON_Mod;3
+    --?[$Con] -gt 7 -and [$Con] -lt 11|=CON_Mod;2
+
+    --<|
+
+    --:CHECK_FIGHTER_CLASS|
+
+    --&SelectedId|@{selected|character_id}
+
+      --=FighterLevel|0
+
+      --?"X[*[&SelectedId]:class]" -inc Fighter|=FighterLevel;[*[&SelectedId]:level]
+      --?"X[*[&SelectedId]:secondclass]" -inc Fighter|=FighterLevel;[*[&SelectedId]:level_2]
+      --?"X[*[&SelectedId]:thirdclass]" -inc Fighter|=FighterLevel;[*[&SelectedId]:level_3]
+
+      --?[$FighterLevel] -gt 4|=FearBonus;2|=FearBonus;0
+
+    --<|
+
+    --/|STATUS MARKER CHECK
+    --/|==============================================================================================================
+
+        --:CHECK_STATUSMARKERS|
+
+             --~|array;statusmarkers;sourceMarkers;@{selected|token_id}
+
+             --/|Initialize the modifier strings to empty
+             --&SaveMod|
+
+             --/|Loop through markers on the SOURCE/SELECTED token
+
+             --%loop|0;[@sourceMarkers()]
+                --&Marker|[@sourceMarkers([&loop])]
+
+                --?"X[&Marker]" -eq "X"|SkipSourceMarker
+
+                --?"[&Marker]" -inc "exhausted"|&SaveMod;-2
+                --?"[&Marker]" -inc "fatigued"|&SaveMod;-2
+                --?"[&Marker]" -inc "frightened"|&SaveMod;-2
+                --?"[&Marker]" -inc "sickened"|&SaveMod;-2
+
+                --?"[&Marker]" -inc "bound"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "climbing"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "entangled"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "fascinated"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "grappled"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "immobile"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "kneeling"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "prone"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "sitting"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "stunned"|REMOVE_DEX_SHIELD
+
+                --?"[&Marker]" -inc "held"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "helpless"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "coma"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "paralyzed"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "sleeping"|REMOVE_DEX_SHIELD
+                --?"[&Marker]" -inc "unconscious"|REMOVE_DEX_SHIELD
+
+                --^Skip_REMOVE_DEX_SHIELD|
+                --:REMOVE_DEX_SHIELD|
+                --=DEX_Mod|0
+                --&SHIELD_CHECK|NONE
+                --:Skip_REMOVE_DEX_SHIELD|
+
+                --?"[&Marker]" -inc "overloaded"|REMOVE_DEX
+                --?"[&Marker]" -inc "hindered"|REMOVE_DEX
+                --?"[&Marker]" -inc "slowed"|REMOVE_DEX
+                --^Skip_REMOVE_DEX|
+                --:REMOVE_DEX|
+                --=DEX_Mod|0
+                --:Skip_REMOVE_DEX|
+
+                --?"[&Marker]" -inc "blind" -and "[&Marker]" -ninc "partial"|=DEX_Mod;[$DEX_Mod] - 4
+
+                --?"[&Marker]" -inc "held"|ADD_NOTE
+                --?"[&Marker]" -inc "helpless"|ADD_NOTE
+                --?"[&Marker]" -inc "coma"|ADD_NOTE
+                --?"[&Marker]" -inc "paralyzed"|ADD_NOTE
+                --?"[&Marker]" -inc "sleeping"|ADD_NOTE
+                --?"[&Marker]" -inc "unconscious"|ADD_NOTE
+                --^Skip_NOTE|
+
+                --:ADD_NOTE|
+                --&NOTES|[h3][b]AOE Effects that damage you are automatically failed![/b]
+                --:Skip_NOTE|
+
+                --&SAVEMODS|+ + [&SaveMod] {[&Marker]}
+
+                --:SkipSourceMarker|
+
+             --%|
+
+             --~SAVEMODS|string;replaceall;+ -;-;[&SAVEMODS]
+             --~SAVEMODS|string;replaceall;{;[;[&SAVEMODS]
+             --~SAVEMODS|string;replaceall;};];[&SAVEMODS]
+
+                --:END_MARKER_CHECKS|
+                --<|
+
+    --/|==============================================================================================================
+
+    }}
