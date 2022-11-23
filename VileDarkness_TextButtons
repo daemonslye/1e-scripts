@@ -1,0 +1,12 @@
+boxcode::{div style='color: black; border: 1px solid #daa520; border-radius: 12px; background-color: #FFD853; display: block; text-align: left; font-size: 14px; margin-bottom: 1px; font-family: Tahoma, sans-serif;'}||
+titlecode::{div style='font-size: 14px; font-family: Rye, sans-serif; color: #000; display: block; font-weight: normal; text-align: center; padding: 10px 0px 10px 0px;'}||
+subtitlestyle::font-size: 10pt; font-family: "Contrail One", sans-serif; font-weight: normal; text-align: center; padding: 0px 0px 0px 10px;||
+textcode::{/div}{img style='margin-bottom: 10px;' src='http://www.daemonslye.com/public/Vintage-Decorative-Divider.svg;'}{div style='padding: 0px; margin-bottom: 10px; font-family: Tahoma, sans-serif;'}||
+h1style::font-size: 10pt; font-family: Tahoma; font-weight: normal; line-height: 1.1em; padding: 5px 0px 5px 5px;||
+h2style::font-size: 10pt; font-family: Tahoma; font-weight: normal; background-color: #FFEBA9; line-height: 1.1em; padding: 5px 0px 5px 5px;||
+h3style::font-size: 10pt; font-family: Tahoma; font-weight: normal; background-color: transparent; line-height: 1.1em; padding: 5px 0px 5px 5px;||
+h4style::border-top: 1px solid white; border-bottom: 1px solid white; font-size: 10pt; font-family: Tahoma; font-weight: bold; background-color: #20DA48; text-align: center; padding: 3px 0px 3px 0px;||
+h5style::border-top: 1px solid white; border-bottom: 1px solid white; font-size: 10pt; color: white; font-family: Tahoma; font-weight: bold; background-color: #C70039; text-align: center; padding: 3px 0px 3px 0px;||
+buttonwrapper::{div style='display: block;'}||
+buttonstyle::style='display: block; font-size: 14px; color:#000; padding: 2px 0px 1px 5px; background-color: transparent; border: 0px solid black; text-align: left; border-radius: 0px;'||
+footer::
