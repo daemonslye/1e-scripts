@@ -1,9 +1,90 @@
 !script {{
-    --#whisper|self
-    --#sourceToken|@{selected|token_id}
-    --#hideTitleCard|1
-    --&SelectedID|[*S:character_id]
-    --&CharacterName|[*S:character_name]
+--/|Script Name: Weapon-Loader-Missile
+
+--/|FORMATTING SECTION
+--/|==============================================================================================================
+
+--#norollhighlight|0
+
+--#titleFontColor|#000000;
+--#titleCardBackground|#ffffff;
+--#titlefontshadow|;
+--#titleFontLineHeight|1.5em;
+--#subtitleFontFace|"Contrail One";
+--#subtitleFontSize|12px
+--#subtitleFontColor|#000000;
+--#tableBorderRadius|4px;
+--#tableborder|2px solid #808080;
+--#tableShadow|0
+
+--#emoteBackground|#f2f2f3
+--#emoteFont|"Contrail One"
+--#emoteFontColor|#4d1635
+--#emoteFontWeight|regular
+--#emoteFontSize|16px
+
+--#evenRowBackground|#eeeeee;
+--#oddRowBackground|#ffffff;
+--#bodyFontFace|Tahoma
+--#bodyFontSize|14px
+
+--/|Button Format
+--#buttonBackground|#4d1635
+--#buttonFontFace|Tahoma
+--#buttonFontSize|16px
+
+--/|Table Styles; Used in the Attack Card
+--/|Row Colors
+--&Even|#ffffff;
+--&Odd|#f3f3f3;
+--&Green|#0BDA51;
+--&Red|#FAA0A0;
+--&Yellow|#FFEA00;
+
+--/|First Row; after card title; adds a dotted line
+--&trStyle1st|style="background-color:[&Odd]"
+--&tdStyle1st|style="border-top: 2px dotted #808080;text-align:left;vertical-align:middle;padding: 5px 1px 5px 5px;"
+
+--/|Table Style
+--&tStyle1|style="width:100%;padding:1px;border-collapse:collapse;"
+
+--/|Row Styles
+--&trStyleEven|style="background-color:[&Even]border-bottom: 2px solid white;"
+--&trStyleOdd|style="background-color:[&Odd]border-bottom: 2px solid white;"
+--&trStyleRed|style="background-color:[&Red]border-bottom: 2px solid white;"
+--&trStyleGreen|style="background-color:[&Green]border-bottom: 2px solid white;"
+
+--/|Data Cell Styles; px = UP/RIGHT/BOTTOM/LEFT
+--&tdStyleLeft|style="text-align:left;vertical-align:middle;padding: 5px 5px 5px 5px;"
+--&tdStyleCenter|style="font-weight:bold;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
+--&tdStyleData|style="font-size:80%;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
+--/|Two-Column Format; Commonly used for buttons: text=left; buttons=right
+--&tdStyleButtonLeft|style="font-family:Tahoma;font-size:100%;width:50%;align:left;valign:middle;padding-left:5px"
+--&tdStyleButtonRight|style="width:50%;align:right;valign:middle;"
+--&tdStyleButtonSingle|style="text-align:left;vertical-align:middle;padding: 1px 1px 1px 5px;"
+
+--/|Row Formatting Variables
+--&EndRow|[/td][/tr]
+--&1stRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyle1st]]
+--&RedCenter|[t [&tStyle1]][tr [&trStyleRed]][td [&tdStyleCenter]]
+--&GreenCenter|[t [&tStyle1]][tr [&trStyleGreen]][td [&tdStyleCenter]]
+--&LeftRowEven|[t [&tStyle1]][tr [&trStyleEven]][td [&tdStyleLeft]]
+--&LeftRowOdd|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleLeft]]
+--&DataRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleData]]
+--&TextRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleCenter]]
+--&SingleButtonRow|[t [&tStyle1]][tr [&trStyleEven]][td [&tdStyleButtonSingle]]
+
+--/|SCRIPT SECTION
+--/|==============================================================================================================
+  --/|Weapon-Loader-Missile
+
+  --#whisper|self
+  --#emoteState|invisible
+  --#sourceToken|@{selected|token_id}
+  --#hideTitleCard|0
+  --#title|Adding a Missile Weapon
+  --&SelectedID|[*S:character_id]
+  --&CharacterName|[*S:character_name]
 
     --:ADD_WEAPON|
 
@@ -86,8 +167,8 @@
     --&Shuriken|Shuriken:1:0:0:0:0:0:0:1d3:1d2:0:Piercing:1:3:5/10/20:x:0:1:5:2:0:0:0:0:0:5:4:3:2:1:0:-1:0:-1:0::[&MacroText]
     --&SlingBullet|Sling Bullet:1:0:0:0:0:0:0:1d4+1:1d6+1:0:Bludgeoning:1:1:50/100/200:x:0:1:0:0:0:0:0:0:0:2:2:1:0:0:0:-2:-1:-3:0:[&Arcing] [&Loading]:[&MacroText]
     --&SlingStone|Sling Stone:1:0:0:0:0:0:0:1d4:1d4:0:Bludgeoning:1:1:40/80/160:x:0:1:0:0:0:0:0:0:0:5:4:2:1:0:0:-2:-1:-3:0:[&Arcing] [&Loading]:[&MacroText]
-    --&MediumSpear|Medium Spear:1:0:0:0:0:0:0:1d6:1d8:0:Piercing:1:1:10/20/30:x:0:1:50:1:0:0:0:0:0:2:2:2:2:1:0:0:0:-1:0::[&MacroText]
-    --&ShortSpear|Short Spear:1:0:0:0:0:0:0:1d6:1d8:0:Piercing:1:1:10/20/30:x:0:1:40:1:0:0:0:0:0:3:3:2:2:1:0:0:0:0:0::[&MacroText]
+    --&MediumSpear|Medium Spear (Thrown):1:0:0:0:0:0:0:1d6:1d8:0:Piercing:1:1:10/20/30:x:0:1:50:1:0:0:0:0:0:2:2:2:2:1:0:0:0:-1:0::[&MacroText]
+    --&ShortSpear|Short Spear (Thrown):1:0:0:0:0:0:0:1d6:1d8:0:Piercing:1:1:10/20/30:x:0:1:40:1:0:0:0:0:0:3:3:2:2:1:0:0:0:0:0::[&MacroText]
 
       --:SelectMissileWeapon|
 
@@ -100,8 +181,11 @@
 
       --~|array;fromstring;field_number;:;[&WeaponData]
 
-      --@setattr| _charid [&SelectedID] _fb-public _fb-header Adding A New Weapon to [&CharacterName] _fb-content Adding a [&SelectedWeapon]. _[&CW][&00_WeaponName]|[@field_number(0)] _[&CW][&01_AttackTypeDropDown]|[@field_number(1)] _[&CW][&02_ToHitAdj]|[@field_number(2)] _[&CW][&03_MagicAdj]|[@field_number(3)] _[&CW][&04_NPPenaltyCheckbox]|[@field_number(4)] _[&CW][&05_DualWieldDropDown]|[@field_number(5)] _[&CW][&06_DualWieldAdj]|[@field_number(6)] _[&CW][&07_WhisperMatrix]|[@field_number(7)] _[&CW][&08_DamageDiceSM]|[@field_number(8)] _[&CW][&09_DamageDiceLarge]|[@field_number(9)] _[&CW][&10_DamageAdj]|[@field_number(10)] _[&CW][&11_DMGType]|[@field_number(11)] _[&CW][&12_NumberofAttacks]|[@field_number(12)] _[&CW][&13_FireRate]|[@field_number(13)] _[&CW][&14_RangeInFeet]|[@field_number(14)] _[&CW][&15_AmmoCurrent]|[@field_number(15)] _[&CW][&16_AmmoMax]|[@field_number(16)] _[&CW][&17_Quantity]|[@field_number(17)] _[&CW][&18_WeightInCoins]|[@field_number(18)] _[&CW][&19_CostInGP]|[@field_number(19)] _[&CW][&20_Length]|[@field_number(20)] _[&CW][&21_SpaceNeededInFeet]|[@field_number(21)] _[&CW][&22_WeaponSpeedFactor]|[@field_number(22)] _[&CW][&23_ArmorRating_0_Adj]|[@field_number(23)] _[&CW][&24_ArmorRating_1_Adj]|[@field_number(24)] _[&CW][&25_ArmorRating_2_Adj]|[@field_number(25)] _[&CW][&26_ArmorRating_3_Adj]|[@field_number(26)] _[&CW][&27_ArmorRating_4_Adj]|[@field_number(27)] _[&CW][&28_ArmorRating_5_Adj]|[@field_number(28)] _[&CW][&29_ArmorRating_6_Adj]|[@field_number(29)] _[&CW][&30_ArmorRating_7_Adj]|[@field_number(30)] _[&CW][&31_ArmorRating_8_Adj]|[@field_number(31)] _[&CW][&32_ArmorRating_9_Adj]|[@field_number(32)] _[&CW][&33_ArmorRating_10_Adj]|[@field_number(33)] _[&CW][&34_ShowWithRollCheckbox]|[@field_number(34)] _[&CW][&35_DescriptionField]|[@field_number(35)] _[&CW][&36_MacroField]|[@field_number(36)]
+      --@setattr| _charid [&SelectedID] _silent _[&CW][&00_WeaponName]|[@field_number(0)] _[&CW][&01_AttackTypeDropDown]|[@field_number(1)] _[&CW][&02_ToHitAdj]|[@field_number(2)] _[&CW][&03_MagicAdj]|[@field_number(3)] _[&CW][&04_NPPenaltyCheckbox]|[@field_number(4)] _[&CW][&05_DualWieldDropDown]|[@field_number(5)] _[&CW][&06_DualWieldAdj]|[@field_number(6)] _[&CW][&07_WhisperMatrix]|[@field_number(7)] _[&CW][&08_DamageDiceSM]|[@field_number(8)] _[&CW][&09_DamageDiceLarge]|[@field_number(9)] _[&CW][&10_DamageAdj]|[@field_number(10)] _[&CW][&11_DMGType]|[@field_number(11)] _[&CW][&12_NumberofAttacks]|[@field_number(12)] _[&CW][&13_FireRate]|[@field_number(13)] _[&CW][&14_RangeInFeet]|[@field_number(14)] _[&CW][&15_AmmoCurrent]|[@field_number(15)] _[&CW][&16_AmmoMax]|[@field_number(16)] _[&CW][&17_Quantity]|[@field_number(17)] _[&CW][&18_WeightInCoins]|[@field_number(18)] _[&CW][&19_CostInGP]|[@field_number(19)] _[&CW][&20_Length]|[@field_number(20)] _[&CW][&21_SpaceNeededInFeet]|[@field_number(21)] _[&CW][&22_WeaponSpeedFactor]|[@field_number(22)] _[&CW][&23_ArmorRating_0_Adj]|[@field_number(23)] _[&CW][&24_ArmorRating_1_Adj]|[@field_number(24)] _[&CW][&25_ArmorRating_2_Adj]|[@field_number(25)] _[&CW][&26_ArmorRating_3_Adj]|[@field_number(26)] _[&CW][&27_ArmorRating_4_Adj]|[@field_number(27)] _[&CW][&28_ArmorRating_5_Adj]|[@field_number(28)] _[&CW][&29_ArmorRating_6_Adj]|[@field_number(29)] _[&CW][&30_ArmorRating_7_Adj]|[@field_number(30)] _[&CW][&31_ArmorRating_8_Adj]|[@field_number(31)] _[&CW][&32_ArmorRating_9_Adj]|[@field_number(32)] _[&CW][&33_ArmorRating_10_Adj]|[@field_number(33)] _[&CW][&34_ShowWithRollCheckbox]|[@field_number(34)] _[&CW][&35_DescriptionField]|[@field_number(35)] _[&CW][&36_MacroField]|[@field_number(36)]
 
-    --X|
+      --:PRINT|
+      --+|[&1stRowFormat]Added a [b][&SelectedWeapon][/b] to [b][*S:t-name][/b]
+
+    --X|End Script
 
     }}
