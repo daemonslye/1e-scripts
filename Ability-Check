@@ -1,0 +1,319 @@
+!script {{
+
+--/|Script Name: Ability-Check
+--/|Location: CharacterScripts
+
+--/|Version: 2022.11.16.001
+
+--/|FORMATTING SECTION
+--/|==============================================================================================================
+
+  --#overridetemplate|VileDarkness_StandardButtons
+
+  --#emoteBackground|#f2f2f3
+  --#emoteFont|"Contrail One"
+  --#emoteFontColor|#4d1635
+  --#emoteFontWeight|regular
+  --#emoteFontSize|16px
+
+  --/|SCRIPT SECTION
+  --/|==============================================================================================================
+
+  --#reentrant|Ability_Check_@{selected|character_id}
+
+  --#sourceToken|@{selected|token_id}
+  --#emoteState|invisible
+
+  --#whisper|self
+
+  --&StrButton|[t][td style="text-align:left; padding: 0px 0px 0px 5px"][rbutton]Strength::ABILITY_CHECK;strength[/rbutton][rbutton]DC::ABILITY_CHECK;strength|&#63;{What is the DC?|15}[/rbutton][/td][/t]
+  --&IntButton|[t][td style="text-align:left; padding: 0px 0px 0px 5px"][rbutton]Intelligence::ABILITY_CHECK;intelligence|0|&#63;{What Spell Are You Attempting to Comprehend?|};[/rbutton][rbutton]DC::ABILITY_CHECK;intelligence|&#63;{What is the DC?|15}[/rbutton][/td][/t]
+  --&WisButton|[t][td style="text-align:left; padding: 0px 0px 0px 5px"][rbutton]Wisdom::ABILITY_CHECK;wisdom;[/rbutton][rbutton]DC::ABILITY_CHECK;wisdom|&#63;{What is the DC?|15}[/rbutton][/td][/t]
+  --&DexButton|[t][td style="text-align:left; padding: 0px 0px 0px 5px"][rbutton]Dexterity::ABILITY_CHECK;dexterity;[/rbutton][rbutton]DC::ABILITY_CHECK;dexterity|&#63;{What is the DC?|15}[/rbutton][/td][/t]
+  --&ConButton|[t][td style="text-align:left; padding: 0px 0px 0px 5px"][rbutton]Constitution::ABILITY_CHECK;constitution;[/rbutton][rbutton]DC::ABILITY_CHECK;constitution|&#63;{What is the DC?|15}[/rbutton][/td][/t]
+  --&ChaButton|[t][td style="text-align:left; padding: 0px 0px 0px 5px"][rbutton]Charisma::ABILITY_CHECK;charisma;[/rbutton][rbutton]DC::ABILITY_CHECK;charisma|&#63;{What is the DC?|15}[/rbutton][/td][/t]
+
+  --#title|Select Ability
+  --+|[&StrButton]
+  --+|[&IntButton]
+  --+|[&WisButton]
+  --+|[&DexButton]
+  --+|[&ConButton]
+  --+|[&ChaButton]
+  --X|
+
+  --:ABILITY_CHECK|AbilityName;DC
+  --~params|string;split;|;[&reentryval]
+  --&AbilityName|[&params1]
+  --=AbilityScore|[*S:[&AbilityName]]
+  --=DC|[&params2]
+  --&SpellName|[&params3]
+
+  --/|DIFFICULTY CHECK ROLL
+  --?"X[$DC]" -eq X|SkipDC
+  --?"X[$DC]" -eq X0|SkipDC
+  --?"[$DC]" -eq false|SkipDC
+  -->DC_Get_Ability_Mod|
+  --=CheckRoll|1d20 + [$Mod] [MOD]
+  --?[$CheckRoll] -ge [$DC]|&Result;Success!|&Result;Failed!
+  --#title|[*S:t-name]'s [&AbilityName] check
+  --&FirstLine|Roll: [$CheckRoll] vs DC [$DC]
+  --?[&Result] -eq Success!|UseGreen
+  --&ResultLine|[h5][&Result]
+  --^SkipGreen|
+  --:UseGreen|
+  --&ResultLine|[h4][&Result]
+  --:SkipGreen|
+  --+|[h1][&FirstLine]
+  --+|[&ResultLine]
+  --^Done|
+  --:SkipDC|
+
+  --?"[&AbilityName]" -eq strength|STRENGTH_CHECK
+  --?"[&AbilityName]" -eq intelligence|INT_CHECK
+  --?"[&AbilityName]" -eq wisdom|WIS_CHECK
+  --?"[&AbilityName]" -eq dexterity|DEX_CHECK
+  --?"[&AbilityName]" -eq constitution|CON_CHECK
+  --?"[&AbilityName]" -eq charisma|CHA_CHECK
+
+  --X|
+
+  --:STRENGTH_CHECK|
+      --=CheckRoll|1d100
+      -->Get_Strength_Checks|
+      --&FirstLine|Roll is [$CheckRoll] vs. [$StrMinor]([$StrLocked])/[$StrMajor]
+      --?[$CheckRoll] -le [$StrMinor]|&MinorResult;You Succeeded a Minor Check!|&MinorResult;You Missed a Minor Check!
+      --?[$CheckRoll] -le [$StrLocked]|&LockedResult;You Succeeded a Locked Check!|&LockedResult;You Missed a Locked Check!
+      --?[$CheckRoll] -le [$StrMajor]|&MajorResult;You Succeeded a Major Check!|&MajorResult;You Missed a Major Check!
+      --?"[&MinorResult]" -inc "Missed"|[
+          --&MinorResultLine|[h5][&MinorResult]
+          --]|[
+          --&MinorResultLine|[h4][&MinorResult]
+          --]|
+      --?"[&LockedResult]" -inc "Missed"|[
+          --&LockedResultLine|[h5][&LockedResult]
+          --]|[
+          --&LockedResultLine|[h4][&LockedResult]
+          --]|
+      --?"[&MajorResult]" -inc "Missed"|[
+          --&MajorResultLine|[h5][&MajorResult]
+          --]|[
+          --&MajorResultLine|[h4][&MajorResult]
+          --]|
+      --/|PRINT CARD
+      --#title|[*S:t-name]'s Strength Check
+      --+|[h1][&FirstLine]
+      --+|[&MinorResultLine]
+      --+|[&LockedResultLine]
+      --+|[&MajorResultLine]
+  --/|End Strength Checks
+  --^Done|
+
+  --:INT_CHECK|
+    -->Comprehension_Check|
+    --=CheckRoll|1d100
+    --&FirstLine|Roll is [$CheckRoll] vs. [$CompCheck]
+    --?[$CheckRoll] -le [$CompCheck]|&CompResult;Success!|&CompResult;Failed!
+    --?"[&CompResult]" -inc Failed|[
+        --&CompResultLine|[h5][&CompResult]
+        --]|[
+        --&CompResultLine|[h4][&CompResult]
+        --]|
+    --/|PRINT CARD
+    --#whisper|
+    --#title|[*S:t-name]'s Comprehend Check
+    --+|[h1][&FirstLine]
+    --+|[h2][b]Spell:[/b] [&SpellName]
+    --+|[&CompResultLine]
+    --^Done|
+
+    --:WIS_CHECK|
+    --=CheckRoll|1d100
+    --?[$AbilityScore] -lt 9|=WisCheck;100
+    --?[$AbilityScore] -eq 9|=WisCheck;20
+    --?[$AbilityScore] -eq 10|=WisCheck;15
+    --?[$AbilityScore] -eq 11|=WisCheck;10
+    --?[$AbilityScore] -eq 12|=WisCheck;5
+    --?[$AbilityScore] -gt 12|=WisCheck;0
+    --&FirstLine|Roll is [$CheckRoll] vs. [$WisCheck]
+    --?[$CheckRoll] -ge [$WisCheck]|&WisResult;You Cast the Spell!|&WisResult;The Spell Failed!
+    --?"[&WisResult]" -inc Failed|[
+        --&WisResultLine|[h5][&WisResult]
+        --]|[
+        --&WisResultLine|[h4][&WisResult]
+        --]|
+    --/|PRINT CARD
+    --#whisper|
+    --#title|[*S:t-name]'s Priest Spell Failure Check
+    --+|[h1][&FirstLine]
+    --+|[&WisResultLine]
+    --^Done|
+
+    --:DEX_CHECK|
+    --=CheckRoll|1d20
+    --&FirstLine|Roll is [$CheckRoll] vs. [$AbilityScore]
+    --?[$CheckRoll] -le [$AbilityScore]|&DexResult;Success!|&DexResult;Failed!
+    --?"[&DexResult]" -inc Failed|[
+        --&DexResultLine|[h5][&DexResult]
+        --]|[
+        --&DexResultLine|[h4][&DexResult]
+        --]|
+    --/|PRINT CARD
+    --#whisper|
+    --#title|[*S:t-name]'s Dexterity Check
+    --+|[h1][&FirstLine]
+    --+|[&DexResultLine]
+    --^Done|
+
+    --:CON_CHECK|
+    --=SystemSave|[*S:systemshock]
+    --=ResurrectSave|[*S:resurrectionsurvival]
+    --=CheckRoll|1d100
+    --&FirstLine|Roll is [$CheckRoll] vs. SS:[$SystemSave]/R:[$ResurrectSave]
+    --?[$CheckRoll] -le [$SystemSave]|&SystemSaveResult;System Save Made!|&SystemSaveResult;System Save Failed!
+    --?"[&SystemSaveResult]" -inc Failed|[
+        --&SystemSaveResultLine|[h5][&SystemSaveResult]
+        --]|[
+        --&SystemSaveResultLine|[h4][&SystemSaveResult]
+        --]|
+    --?[$CheckRoll] -le [$ResurrectSave]|&ResurrectSaveResult;Resurrect Save Made!|&ResurrectSaveResult;Resurrect Save Failed!
+        --?"[&ResurrectSaveResult]" -inc Failed|[
+            --&ResurrectSaveResultLine|[h5][&ResurrectSaveResult][&EndRow]
+            --]|[
+            --&ResurrectSaveResultLine|[h4][&ResurrectSaveResult][&EndRow]
+            --]|
+    --/|PRINT CARD
+    --#whisper|
+    --#title|[*S:t-name]'s System/Resurrect Save
+    --+|[h1][&FirstLine]
+    --+|[&SystemSaveResultLine]
+    --+|[&ResurrectSaveResultLine]
+    --^Done|
+
+    --:CHA_CHECK|
+    --=BaseLoyalty|50 + [*S:loyaltybonus]
+    --=ReactionAdj|[*S:reactionbonus]
+    --=CheckRoll|1d100
+
+    --&FirstLine|Roll is [$CheckRoll] vs. Base Loyalty [$BaseLoyalty]
+    --?[$CheckRoll] -le [$BaseLoyalty]|&LoyaltyResult;They Are Loyal!|&LoyaltyResult;Their Loyalty Falters!
+        --?"[&LoyaltyResult]" -inc Falters|[
+            --&LoyaltyResultLine|[h5][&LoyaltyResult]
+            --]|[
+            --&LoyaltyResultLine|[h4][&LoyaltyResult]
+            --]|
+
+            --=ReactionCheck1|[$CheckRoll] + [$ReactionAdj] [ADJ]
+            --=ReactionCheck2|1d100
+
+            --?[$ReactionCheck1] -gt 95|&ReactionCheck;Enthusiastically Friendly
+            --?[$ReactionCheck1] -lt 6|&ReactionCheck;[b]Hostile[/b] (attack or check morale)
+
+            --?[$ReactionCheck1] -gt 75 -and [$ReactionCheck1] -lt 96|&ReactionCheck;Friendly
+            --?[$ReactionCheck1] -gt 45 -and [$ReactionCheck1] -lt 56|&ReactionCheck;Neutral-Uninterested-Uncertain
+            --?[$ReactionCheck1] -gt 5 -and [$ReactionCheck1] -lt 26|&ReactionCheck;[b]Hostile[/b] (act or check morale)
+
+            --?[$ReactionCheck1] -gt 55 -and [$ReactionCheck1] -lt 76|>GetReaction;Positive
+            --?[$ReactionCheck1] -gt 25 -and [$ReactionCheck1] -lt 46|>GetReaction;Negative
+
+            --?"[&ReactionCheck]" -inc Friendly|[
+                --&ReactionResultLine|[h4][&ReactionCheck]
+                --]|
+            --?"[&ReactionCheck]" -inc Positive|[
+                --&ReactionResultLine|[h4][&ReactionCheck]
+                --]|
+            --?"[&ReactionCheck]" -inc Hostile|[
+                --&ReactionResultLine|[h5][&ReactionCheck][&EndRow]
+                --]|
+            --?"[&ReactionCheck]" -inc Negative|[
+                --&ReactionResultLine|[h5][&ReactionCheck][&EndRow]
+                --]|
+            --?"[&ReactionCheck]" -inc Neutral|[
+                --&ReactionResultLine|[h4][&ReactionCheck][&EndRow]
+                --]|
+            --?"[&ReactionCheck]" -inc Uncertain|[
+                --&ReactionResultLine|[h5][&ReactionCheck][&EndRow]
+                --]|
+
+            --/|PRINT CARD
+            --#whisper|gm
+            --#title|Loyalty/Reaction Check ([*S:t-name])
+            --+|[h1][&FirstLine]
+            --+|[&LoyaltyResultLine]
+            --+|[h3]Reaction Roll is [$ReactionCheck1]
+            --+|[&ReactionResultLine]
+            --+|[h2][+ LOYALTY ADJ](https://sites.google.com/view/version125/non-player-characters/loyalty#h.p_EJ6zC4EFX9Cc) & [+ REACTION ADJ](https://sites.google.com/view/viledarkness/adventuring/social-interaction#h.a0qa3up27t27)
+            --^Done|
+
+            --:GetReaction|
+            --?[$ReactionCheck2] -lt 56|&ReactionCheck;[%1%]|&ReactionCheck;Uncertain
+            --<|
+
+  --:Done|
+  --X|
+
+  --:Get_Strength_Checks|
+      --?[$AbilityScore] -eq 18|CheckExc
+      --?[$AbilityScore] -eq 3|>SetMods;15;0;0
+      --?[$AbilityScore] -eq 23|>SetMods;90;80;90
+      --?[$AbilityScore] -eq 22|>SetMods;90;70;80
+      --?[$AbilityScore] -eq 21|>SetMods;90;60;70
+      --?[$AbilityScore] -eq 20|>SetMods;90;50;60
+      --?[$AbilityScore] -eq 19|>SetMods;90;40;50
+      --?[$AbilityScore] -eq 17|>SetMods;50;0;13
+      --?[$AbilityScore] -eq 16|>SetMods;50;0;10
+      --?[$AbilityScore] -ge 24|>SetMods;95;90;100
+      --?[$AbilityScore] -gt 13 -and [$AbilityScore] -lt 16|>SetMods;30;0;7
+      --?[$AbilityScore] -gt 11 -and [$AbilityScore] -lt 14|>SetMods;30;0;4
+      --?[$AbilityScore] -gt 9 -and [$AbilityScore] -lt 12|>SetMods;30;0;2
+      --?[$AbilityScore] -gt 7 -and [$AbilityScore] -lt 10|>SetMods;30;0;1
+      --?[$AbilityScore] -gt 3 -and [$AbilityScore] -lt 8|>SetMods;15;0;0
+      --^SkipSetMods|
+
+      --:CheckExc|
+      --?[*S:exceptionalstrength] -eq 100|>SetMods;85;30;40
+      --?"X[*S:exceptionalstrength]" -eq "X"|>SetMods;50;0;16
+      --?"[*S:exceptionalstrength]" -eq "0"|>SetMods;50;0;16
+      --?[*S:exceptionalstrength] -gt 91 -and [*S:exceptionalstrength] -le 99|>SetMods;70;15;35
+      --?[*S:exceptionalstrength] -gt 75 -and [*S:exceptionalstrength] -lt 91|>SetMods;70;0;30
+      --?[*S:exceptionalstrength] -gt 50 -and [*S:exceptionalstrength] -lt 76|>SetMods;70;0;25
+      --?[*S:exceptionalstrength] -lt 51|>SetMods;50;0;20
+
+      --^SkipSetMods|
+
+      --:SetMods|Minor;Locked;Major
+      --=StrMinor|[%1%]
+      --=StrLocked|[%2%]
+      --=StrMajor|[%3%]
+      --:SkipSetMods|
+  --<|
+
+  --:Comprehension_Check|
+    --?[$AbilityScore] -ge 24|=CompCheck;100
+    --?[$AbilityScore] -lt 10|=CompCheck;35
+    --?[$AbilityScore] -eq 23|=CompCheck;99
+    --?[$AbilityScore] -eq 22|=CompCheck;98
+    --?[$AbilityScore] -eq 21|=CompCheck;97
+    --?[$AbilityScore] -eq 20|=CompCheck;96
+    --?[$AbilityScore] -eq 19|=CompCheck;95
+    --?[$AbilityScore] -eq 18|=CompCheck;85
+    --?[$AbilityScore] -eq 17|=CompCheck;75
+    --?[$AbilityScore] -gt 14 -and [$AbilityScore] -lt 17|=CompCheck;65
+    --?[$AbilityScore] -gt 12 -and [$AbilityScore] -lt 15|=CompCheck;55
+    --?[$AbilityScore] -gt 9 -and [$AbilityScore] -lt 13|=CompCheck;45
+  --<|
+
+  --:DC_Get_Ability_Mod|
+    --=Mod|0
+    --?[$AbilityScore] -lt 3|=Mod;-4
+    --?[$AbilityScore] -eq 3|=Mod;-3
+    --?[$AbilityScore] -gt 19|=Mod;4
+    --?[$AbilityScore] -gt 15 -and [$AbilityScore] -lt 20|=Mod;3
+    --?[$AbilityScore] -gt 13 -and [$AbilityScore] -lt 16|=Mod;2
+    --?[$AbilityScore] -gt 11 -and [$AbilityScore] -lt 14|=Mod;1
+    --?[$AbilityScore] -gt 5 -and [$AbilityScore] -lt 8|=Mod;-1
+    --?[$AbilityScore] -gt 3 -and [$AbilityScore] -lt 6|=Mod;-2
+  --<|
+
+  --X|
+}}
