@@ -1,0 +1,144 @@
+!script {{
+
+--/|Script Name: Cast-Spell
+--/|Location: CharacterScripts
+
+--/|Version: 2022.11.16.001
+
+--/|SETTINGS SECTION
+--/|==============================================================================================================
+
+
+
+  --/|FORMATTING SECTION
+  --/|==============================================================================================================
+
+    --#overridetemplate|VileDarkness_TextButtons
+
+    --#emoteBackground|#f2f2f3
+    --#emoteFont|"Contrail One"
+    --#emoteFontColor|#4d1635
+    --#emoteFontWeight|regular
+    --#emoteFontSize|16px
+
+  --/|BUTTON FORMAT (seems to work best with sheetbutton or rbutton)
+    --#buttonBackground|#4d1635
+    --#buttonFontFace|Tahoma
+    --#buttonFontSize|14px
+
+--/|SCRIPT SECTION
+--/|==============================================================================================================
+
+--#reentrant|Spell_Menu_@{selected|character_id}
+
+  --#whisper|self
+  --#title|@{selected|token_name}'s Prepared Spells
+  --#emoteState|invisible
+
+  --#sourceToken|@{selected|token_id}
+  --&SelectedID|[*S:character_id]
+
+  --Rfirst|@{selected|character_id};repeating_spells
+  --=FirstSpell|1
+  --=SpellRow|0
+  --&Buttons|
+
+  --:SpellButtonDisplay|
+
+  --?[$FirstSpell] -eq 1|SkipAddRow
+  --=SpellRow|[$SpellRow] + 1
+  --:SkipAddRow|
+
+  --?"[*R:spell_name]" -eq "NoRepeatingAttributeLoaded"|FinishButtons
+  --?"X[*R:spell_memorized]" -eq "X"|SkipSpell
+  --?"X[*R:spell_memorized]" -eq "X0"|SkipSpell
+
+  --=NumberMemorized|[*R:spell_memorized]
+  --%PrintLoop|1;[$NumberMemorized]
+  --?"[*R:spell_description]" -inc "SpellScripts"|MakeSheetButton
+  --&Button|[rbutton][*R:spell_name]::CAST_SPELL;[$SpellRow][/rbutton]
+  --^SkipSheetButton|
+  --:MakeSheetButton|
+  --&Button|[sheetbutton][*R:spell_name]::SpellScripts::[*R:spell_name][/sheetbutton]
+  --:SkipSheetButton|
+  --&PrintButtons[*R:spell_level]|+ [&1stRowFormat][&Button]
+  --%|
+
+  --:SkipSpell|
+  --Rnext|
+  --=FirstSpell|0
+  --:FinishButtons|
+  --?"[*R:spell_name]" -ne "NoRepeatingAttributeLoaded"|SpellButtonDisplay
+
+      --?"X[&PrintButtons1]" -eq X|SkipLevel1
+      --+|[h2][b]1st Level[/b]
+      --+|[&PrintButtons1]
+      --:SkipLevel1|
+      --?"X[&PrintButtons2]" -eq X|SkipLevel2
+      --+|[h2][b]2nd Level[/b]
+      --+|[&PrintButtons2]
+      --:SkipLevel2|
+      --?"X[&PrintButtons3]" -eq X|SkipLevel3
+      --+|[h2][b]3rd Level[/b]
+      --+|[&PrintButtons3]
+      --:SkipLevel3|
+      --?"X[&PrintButtons4]" -eq X|SkipLevel4
+      --+|[h2][b]4th Level[/b]
+      --+|[&PrintButtons4]
+      --:SkipLevel4|
+      --?"X[&PrintButtons5]" -eq X|SkipLevel5
+      --+|[h2][b]5th Level[/b]
+      --+|[&PrintButtons5]
+      --:SkipLevel5|
+      --?"X[&PrintButtons6]" -eq X|SkipLevel6
+      --+|[h2][b]6th Level[/b]
+      --+|[&PrintButtons6]
+      --:SkipLevel6|
+      --?"X[&PrintButtons7]" -eq X|SkipLevel7
+      --+|[h2][b]7th Level[/b]
+      --+|[&PrintButtons7]
+      --:SkipLevel7|
+      --?"X[&PrintButtons8]" -eq X|SkipLevel8
+      --+|[h2][b]8th Level[/b]
+      --+|[&PrintButtons8]
+      --:SkipLevel8|
+      --?"X[&PrintButtons9]" -eq X|SkipLevel9
+      --+|[h2][b]9th Level[/b]
+      --+|[&PrintButtons9]
+      --:SkipLevel9|
+
+      --X|
+
+  --:CAST_SPELL|
+
+  --#whisper|
+  --#emoteState|visible
+
+  --/|USE BUTTON VALUES
+
+  --/|Split the reentryval parameters into an array
+
+  --/|1=Spell Slot
+  --~params|string;split;|;[&reentryval]
+
+  --=SpellRow|[&params1]
+  --Rbyindex|@{selected|character_id};repeating_spells;[$SpellRow]
+
+  --&SpellName|
+  --&SpellName|+[*R:spell_name]
+
+
+  --#whisper|self,gm
+  --#emoteText|[*S:t-name] casts [&SpellName]!
+  --@setattr|_charid [*S:character_id] _modb _[*R>spell_memorized]|-1 _silent
+  --#title|[&SpellName]
+  --+|[h1][b]Spell Level:[/b] [*R:spell_level] (CL [*S:level])
+  --+|[h2][b]CT:[/b] [*R:spell_ct] ([*R:spell_components])
+  --+|[h1][b]Range:[/b] [*R:spell_range]
+  --+|[h2][b]AOE:[/b] [*R:spell_aoe]
+  --+|[h1][b]Duration:[/b] [*R:spell_duration]
+  --+|[h2][b]Save:[/b] [*R:spell_save]
+  --+|[h1][*R:spell_description]
+
+  --X|
+  }}
