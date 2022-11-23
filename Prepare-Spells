@@ -1,0 +1,139 @@
+!script {{
+
+--/|Script Name: Prepare-Spells
+--/|Location: CharacterScripts
+
+--/|Version: 2022.11.18.001
+
+--/|SETTINGS SECTION
+--/|==============================================================================================================
+
+
+
+  --/|FORMATTING SECTION
+  --/|==============================================================================================================
+
+  --#overridetemplate|VileDarkness_TextButtons
+
+    --#emoteBackground|#f2f2f3
+    --#emoteFont|"Contrail One"
+    --#emoteFontColor|#4d1635
+    --#emoteFontWeight|regular
+    --#emoteFontSize|16px
+
+    --/|buttonBackground|#4d1635
+    --#buttonTextColor|#ffffff
+    --#buttonBackground|#c811c8
+    --#buttonFontFace|Tahoma
+    --#buttonFontSize|14px
+
+--/|SCRIPT SECTION
+--/|==============================================================================================================
+
+--#reentrant|Prepare_Spells_@{selected|character_id}
+
+  --#whisper|self
+  --#title|@{selected|token_name}'s Spell List
+  --#emoteState|invisible
+
+  --#sourceToken|@{selected|token_id}
+  --&SelectedID|[*S:character_id]
+
+  --&1stMax|[*S:spells_lvl_1^]/
+  --&2ndMax|[*S:spells_lvl_2^]/
+  --&3rdMax|[*S:spells_lvl_3^]/
+  --&4thMax|[*S:spells_lvl_4^]/
+  --&5thMax|[*S:spells_lvl_5^]/
+  --&6thMax|[*S:spells_lvl_6^]/
+  --&7thMax|[*S:spells_lvl_7^]/
+  --&8thMax|[*S:spells_lvl_8^]/
+  --&9thMax|[*S:spells_lvl_9^]
+
+  --&SpellSlots|[b]Spell Slots:[/b] [&1stMax][&2ndMax][&3rdMax][&4thMax][&5thMax][&6thMax][&7thMax][&8thMax][&9thMax]
+
+  --Rfirst|@{selected|character_id};repeating_spells
+
+  --=Count|1
+  --&Buttons|
+
+      --:SpellButtonDisplay|
+      --&Star|
+
+      --?"[*R:spell_memorized]" -gt 0|[
+          --&Star|&nbsp;**(x[*R:spell_memorized])**
+          --]|
+
+      --&Button|[rbutton][*R:spell_name][&Star]::PREP_SPELL;[=[$Count.Raw] - 1][/rbutton]
+
+      --&PrintButtons[*R:spell_level]|+ [&Button]
+      --=Count|[$Count] + 1
+      --=MemSpellCount[*R:spell_level]|[$MemSpellCount[*R:spell_level]] + [*R:spell_memorized]
+
+      --Rnext|
+      --?"[*R:spell_name]" -ne "NoRepeatingAttributeLoaded"|SpellButtonDisplay
+
+      --+|[h1][&SpellSlots]
+      --?"X[&PrintButtons1]" -eq X|SkipLevel1
+      --+|[h2][b]1st Level[/b] ([$MemSpellCount1.Raw])
+      --+|[&PrintButtons1]
+      --:SkipLevel1|
+      --?"X[&PrintButtons2]" -eq X|SkipLevel2
+      --+|[h2][b]2nd Level[/b] ([$MemSpellCount2.Raw])
+      --+|[&PrintButtons2]
+      --:SkipLevel2|
+      --?"X[&PrintButtons3]" -eq X|SkipLevel3
+      --+|[h2][b]3rd Level[/b] ([$MemSpellCount3.Raw])
+      --+|[&PrintButtons3]
+      --:SkipLevel3|
+      --?"X[&PrintButtons4]" -eq X|SkipLevel4
+      --+|[h2][b]4th Level[/b] ([$MemSpellCount4.Raw])
+      --+|[&PrintButtons4]
+      --:SkipLevel4|
+      --?"X[&PrintButtons5]" -eq X|SkipLevel5
+      --+|[h2][b]5th Level[/b] ([$MemSpellCount5.Raw])
+      --+|[&PrintButtons5]
+      --:SkipLevel5|
+      --?"X[&PrintButtons6]" -eq X|SkipLevel6
+      --+|[h2][b]6th Level[/b] ([$MemSpellCount6.Raw])
+      --+|[&PrintButtons6]
+      --:SkipLevel6|
+      --?"X[&PrintButtons7]" -eq X|SkipLevel7
+      --+|[h2][b]7th Level[/b] ([$MemSpellCount7.Raw])
+      --+|[&PrintButtons7]
+      --:SkipLevel7|
+      --?"X[&PrintButtons8]" -eq X|SkipLevel8
+      --+|[h2][b]8th Level[/b] ([$MemSpellCount8.Raw])
+      --+|[&PrintButtons8]
+      --:SkipLevel8|
+      --?"X[&PrintButtons9]" -eq X|SkipLevel9
+      --+|[h2][b]9th Level[/b] ([$MemSpellCount9.Raw])
+      --+|[&PrintButtons9]
+      --:SkipLevel9|
+
+      --X|
+
+  --:PREP_SPELL|
+
+  --&WHISPER_TO|self
+  --?[&SendingPlayerIsGM] -eq 1|&WHISPER_TO;self
+  --#whisper|[&WHISPER_TO]
+  --#emoteState|invisible
+
+  --/|USE BUTTON VALUES
+
+  --/|Split the reentryval parameters into an array
+
+  --/|1=Spell Slot
+  --~params|string;split;|;[&reentryval]
+
+  --=SpellRow|[&params1]
+  --Rbyindex|@{selected|character_id};repeating_spells;[$SpellRow]
+
+  --&SpellName|
+  --&SpellName|+[*R:spell_name]
+  --*|[c][*S:t-name] prepares [&SpellName][/c]
+
+  --#title|[*S:t-name] prepares [&SpellName]
+  --@setattr|_charid [*S:character_id] _modb _[*R>spell_memorized]|1 _silent
+  --X|
+  }}
