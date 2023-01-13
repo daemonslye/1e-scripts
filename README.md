@@ -1,2 +1,4 @@
 # 1e-scripts
+NOTE: I don't keep these scripts located here totally up-to-date... Please DM me on Roll20 if you want the latest updates (there are many): https://app.roll20.net/users/1677957/david-m
+
 Roll20 ScriptCards Scripts for the 1e Character Sheet; Many/Most scripts now require ScriptCards (latest), Supernotes, TokenMod, ChatSetAttr, and SelectManager. Most scripts also require the the ScriptCards/Supernotes templates which must be installed as abilities in a file named ScriptCards_TemplateMule. All rules conform to the ruleset found at www.viledarkness.com (1eOSR). Location is indicated in each file. These scripts are to be installed in one of the following sheets as Abilities (called via the command: %{SheetName|AbilityName}). The sheet names are as follows: CharacterScripts, AbilityScripts, SpellScripts, ItemScripts, and GameScripts.
