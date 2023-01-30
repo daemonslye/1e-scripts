@@ -3,7 +3,7 @@
 --/|Script Name: Save-Menu
 --/|Location: CharacterScripts
 
---/|Version: 2022.11.17.001
+--/|Version: 2022.12.14.001
 
 --/|SETTINGS SECTION
 --/|==============================================================================================================
@@ -54,7 +54,7 @@
 
   --:Buttons|goto;title;user_mod;button_mod;button_mod_roll_text
 
-  --#title|Save Menu
+  --#title|[*S:t-name]'s Save Menu
 
   --&SaveMenu|
   [t style="width:100%;padding:1px;border-collapse:collapse;"][tr][td style="border-top: 2px dotted #808080;width:25%;align:left;valign:middle;padding-left:5px"][rbutton]POISON::MAKE_SAVE;poison|Poison|&#63;{Modifier|0}|NA|[NA][/rbutton]    [/td][td style="border-top: 2px dotted #808080;width:75%;padding: 1px 1px 1px 6px;"][rbutton:#ffffff:#585858]DEX::MAKE_SAVE;poison|Poison (Dex)|&#63;{Modifier|0}|DEX|[DEX][/rbutton][rbutton:#ffffff:#585858]WIS::MAKE_SAVE;poison|Poison (Wis)|&#63;{Modifier|0}|WIS|[WIS][/rbutton][rbutton:#ffffff:#585858]RACE::MAKE_SAVE;poison|Poison (Con)|&#63;{Modifier|0}|CON|[CON][/rbutton][rbutton:#ffffff:#585858]AOE::MAKE_SAVE;poison|Poison (AOE)|&#63;{Modifier|0}|AOE|[DEX and ARMOR][/rbutton][/td][/tr][/t]
