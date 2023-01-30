@@ -142,7 +142,7 @@
   [&33_ArmorRating_10_Adj]:[@field_number(33)]|
   [&34_ShowWithRollCheckbox]:[@field_number(34)]|
   [&35_DescriptionField]:[&BEGINNING][&colon][&END]
-  
+
   --/|Currently, don't change the macro field; [&36_MacroField]:[@field_number(36)]
 
   --&WHISPER_TO|self
@@ -151,6 +151,6 @@
 
   --#title|Add Missile Weapon
   --+|[h1][c]Added a [b][&SelectedWeapon][/b] to [b][*S:t-name][/b][/c]
-  --+|[h2]Note that there is a bug such that you MUST open the sheet and set the missile weapon to Melee then Missile again to get the missile fields to display. I'm working to fix this.
+
 
 }}
