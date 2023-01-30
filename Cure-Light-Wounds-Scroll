@@ -1,7 +1,7 @@
 !script {{
   --/|Script Name: Cure-Light-Wounds-Scroll
   --/|Location: ItemScripts
-  --/|Scroll name MUST be Cure-Light-Wounds and Ability in AbilityScripts must be named Cure-Light-Wounds
+  --/|Scroll name MUST be Cure-Light-Wounds and Ability in ItemScripts must be named Cure-Light-Wounds
 
   --/|Note: This is for SCROLL SPELLS only. Spontaneously cast cure spells are found in AbilityScripts and Spells in SpellScripts.
 
@@ -51,9 +51,6 @@
 --?"[&SourceTokenFirstName]" -eq The|&SourceTokenFirstName;[&SourceTokenName]
 --?"[&TargetTokenFirstName]" -eq The|&TargetTokenFirstName;[&TargetTokenName]
 
---/|SET CASTER TYPES; Make sure to include all possible caster types for the spell limited to (list w/no spaces and separated by semi-colons): Magic-user;Illusionist;Cleric;Druid
---&PossibleCasterTypes|Cleric;Druid
-
 -->FIND_CASTER_TYPE_AND_LEVEL|
 
 --/|NOT USED
@@ -69,9 +66,16 @@
 --?[&Scroll_Not_Found] -eq 1|SPELLNOTFOUND
 --?[&NO_USES_REMAINING] -eq 1|NO_USES
 
---?[&CasterType] -inc Druid|=DruidBonus;[$CasterLevel]
+--?[&CasterType] -inc druid|[
+      --=DruidBonus|[$CasterLevel]
+      --=CureRoll|2d8kh1 + [$DruidBonus][DRUID]
+      --^SkipClericCureRoll|
+      --]|
 
---=CureRoll|2d8kh1 + [$DruidBonus][DRUID]
+--?[$CasterLevel] -eq 1|=CasterLevel;0
+--=CureRoll|2d8kh1 + [$CasterLevel][LVL]
+--:SkipClericCureRoll|
+
 --=DURATION|
 --=CURRENTHP|[*T:t-[&TOKEN_HP_BAR]_value]
 --=MAXHP|[*T:t-[&TOKEN_HP_BAR]_max]
@@ -132,20 +136,18 @@
 
 --?[*R:equipment_current] -lt 1|&NO_USES_REMAINING;1
 
---~|array;define;Possible_Caster_Types;[&PossibleCasterTypes]
-
---%loop|foreach;Possible_Caster_Types
-
---?"[*R:equipment_description]" -inc [&loop]|[
-      --&CasterType|[&loop]
-      --%!|
+--?"[*R:equipment_description]" -inc cleric|[
+      --&CasterType|Cleric
+      --^SkipDruid|
       --]|
---%|
 
+--?"[*R:equipment_description]" -inc druid|&CasterType;Druid
+
+--:SkipDruid|
 --=CasterLevel|[*R:equipment_quantity^]
+--*CL|[$CasterLevel]
 --?"X[$CasterLevel]" -eq X|CASTER_LEVEL_ERROR
 --?[$CasterLevel] -lt 1|CASTER_LEVEL_ERROR
-
 --:Skip_Caster_Checks|
 --<|
 
