@@ -1,8 +1,8 @@
 !script {{
 
---/|Script Name: 1e-Attack-Menu
+--/|Script Name: Attack-Menu
 
---/|Version: 2022.10.24.001
+--/|Version: 2022.11.15.001
 
 --/|SETTINGS SECTION
 --/|==============================================================================================================
@@ -19,6 +19,7 @@
   --/|If set to ON, will look for statusmarkers on selected & target tokens to match against the database sheet.
   --&DatabaseSheetID|@{1e-attack-database|character_id}
   --&UseStatuses|ON
+  --&MirrorImageStatusmarker|purple
 
   --/|Ranged Weapon Settings
   --&AskforRange|OFF
@@ -38,87 +39,22 @@
   --/|Apply Damage to Token; If ON, will automatically deduct damage on the target token.
   --&ApplyDamagetoToken|ON
 
-  --/|FORMATTING SECTION
-  --/|==============================================================================================================
+--/|FORMATTING SECTION
+--/|==============================================================================================================
 
-    --#hideTitleCard|0
+--#overridetemplate|VileDarkness_StandardButtons
 
-    --#titleFontColor|#000000;
-    --#titleCardBackground|#ffffff;
-    --#titlefontshadow|;
-    --#titleFontLineHeight|1.5em;
+--#emoteBackground|#f2f2f3
+--#emoteFont|"Contrail One"
+--#emoteFontColor|#4d1635
+--#emoteFontWeight|regular
+--#emoteFontSize|16px
 
-    --#subtitleFontFace|"Contrail One";
-    --#subtitleFontSize|12px
-    --#subtitleFontColor|#000000;
-
-    --#tableBorderRadius|4px;
-    --#tableborder|2px solid #808080;
-    --#tableShadow|0
-
-    --/|MIN/MAX INDICATOR ON ROLLS; IF 0, will produce colored numbers
-    --#nominmaxhighlight|0
-
-    --#evenRowBackground|#eeeeee;
-    --#oddRowBackground|#ffffff;
-    --#bodyFontFace|Tahoma
-    --#bodyFontSize|14px
-
-    --#emoteBackground|#f2f2f3
-    --#emoteFont|"Contrail One"
-    --#emoteFontColor|#4d1635
-    --#emoteFontWeight|regular
-    --#emoteFontSize|16px
-
-  --/|BUTTON FORMAT (seems to work best with sheetbutton or rbutton)
-    --#buttonBackground|#4d1635
-    --#buttonFontFace|Tahoma
-    --#buttonFontSize|14px
-
-  --/|TABLE STYLES
-    --/|ROW COLORS
-      --&Even|#ffffff;
-      --&Odd|#f3f3f3;
-      --&Green|#0BDA51;
-      --&Red|#FAA0A0;
-      --&Yellow|#FFEA00;
-
-  --/|1ST ROW STYLES (after card title; adds a dotted line)
-      --&trStyle1st|style="background-color:[&Odd]"
-      --&tdStyle1st|style="border-top: 2px dotted #808080;text-align:left;vertical-align:middle;padding: 5px 1px 5px 5px;"
-
-  --/|TABLE STYLE
-      --&tStyle1|style="width:100%;padding:1px;border-collapse:collapse;"
-
-  --/|ROW STYLES
-      --&trStyleEven|style="background-color:[&Even]border-bottom: 2px solid white;"
-      --&trStyleOdd|style="background-color:[&Odd]border-bottom: 2px solid white;"
-      --&trStyleRed|style="background-color:[&Red]border-bottom: 2px solid white;"
-      --&trStyleGreen|style="background-color:[&Green]border-bottom: 2px solid white;"
-
-  --/|DATA CELL STYLES
-      --&tdStyleLeft|style="text-align:left;vertical-align:middle;padding: 5px 5px 5px 5px;"
-      --&tdStyleCenter|style="font-weight:bold;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
-      --&tdStyleData|style="font-size:80%;text-align:center;vertical-align:middle;padding: 5px 5px 5px 5px;"
-  --/|TWO COLUMN FORMAT (commonly used for buttons: text=left; buttons=right)
-        --&tdStyleButtonLeft|style="font-family:Tahoma;font-weight:regular;font-size:100%;width:50%;align:left;valign:middle;padding-left:5px"
-        --&tdStyleButtonRight|style="width:50%;align:right;valign:middle;"
-
-  --/|ROW FORMATTING VARIABLES
-      --&EndRow|[/td][/tr]
-      --&1stRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyle1st]]
-      --&RedCenter|[t [&tStyle1]][tr [&trStyleRed]][td [&tdStyleCenter]]
-      --&GreenCenter|[t [&tStyle1]][tr [&trStyleGreen]][td [&tdStyleCenter]]
-      --&LeftRowEven|[t [&tStyle1]][tr [&trStyleEven]][td [&tdStyleLeft]]
-      --&LeftRowOdd|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleLeft]]
-      --&DataRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleData]]
-      --&TextRowCenter|[t [&tStyle1]][tr [&trStyleOdd]][td [&tdStyleCenter]]
-      --&LeftButtonRowFormat|[t [&tStyle1]][tr [&trStyle1st]][td [&tdStyleButtonLeft]]
 
 --/|SCRIPT SECTION
 --/|==============================================================================================================
 
---#reentrant|1e_Attack_Menu_@{selected|character_id}
+--#reentrant|Attack_Menu_@{selected|character_id}
 
 --/|Whisper Menu
 
@@ -141,14 +77,10 @@
     --?"[&FirstToken]" -ne [*[@SC_SelectedTokens([&tokenLoop])]:t-represents]|MISMATCHED_TOKENS
   --%|
   --=AttackerCount|[@SC_SelectedTokens()]
-  --#leftsub|Number of Attackers : [$AttackerCount.Raw]
+  --/|leftsub|Number of Attackers : [$AttackerCount.Raw]
   --^SKIP_MULTI_TOKEN_CHECK|
   --:MISMATCHED_TOKENS|
-    --&ColoredRow1|[&trStyleRed]
-    --&OutofAmmoChatCard|
-      [t [&tStyle1]]
-      [tr [&ColoredRow1]][td [&tdStyleCenter]]When selecting multiple tokens, all tokens must represent the same character sheet.[&EndRow]
-      [/t]
+    --&OutofAmmoChatCard|[h5]When selecting multiple tokens, all tokens must represent the same character sheet.
     --+|[&OutofAmmoChatCard]
   --X|
 
@@ -162,8 +94,8 @@
   --&Buttons|
   --?"[*R:weapon_name]" -ne "NoRepeatingAttributeLoaded"|[
     --:Weapon_Display|
-    --&Button|[rbutton][*R:weapon_name]::PERFORM_WEAPON_ATTACK;[=[$Count.Raw]-1]|[$AttackerCount.Raw]|&#64;{target|token_id}[/rbutton] [rbutton]Adj::PERFORM_WEAPON_ATTACK;[=[$Count.Raw]-1]|[$AttackerCount.Raw]|&#64;{target|token_id}|&#63;{To Hit Adj.|0}|&#63;{Damage Adj.|0}|&#63;{Target AC Adj. (Negative values make AC Worse)|0}[/rbutton]
-    --&PrintLine|+ [&LeftButtonRowFormat][&Button][&EndRow]
+    --&Button|[t][td style="text-align:left; padding: 0px 0px 0px 5px"][rbutton][*R:weapon_name]::PERFORM_WEAPON_ATTACK;[=[$Count.Raw]-1]|[$AttackerCount.Raw]|&#64;{target|token_id}[/rbutton][rbutton]Adj::PERFORM_WEAPON_ATTACK;[=[$Count.Raw]-1]|[$AttackerCount.Raw]|&#64;{target|token_id}|&#63;{To Hit Adj.|0}|&#63;{Damage Adj.|0}|&#63;{Target AC Adj. (Negative values make AC Worse)|0}[/rbutton][/td][/t]
+    --&PrintLine|+ [&Button]
     --=Count|[$Count] + 1
     --Rnext|
     --?"[*R:weapon_name]" -ne "NoRepeatingAttributeLoaded"|Weapon_Display
@@ -193,6 +125,10 @@
   --=UserEnteredTargetACAdj|[&params6]
 
   --:SKIP_USER_DEF_PARAMS|
+
+  --&TARGET_TOKEN_ID|[&params3]
+
+  --=AreThereMultipleAttackers|[&params2]
 
   --=WeaponRow|[&params1]
   --Rbyindex|@{selected|character_id};repeating_weapon;[$WeaponRow]
@@ -249,8 +185,8 @@
 
 --/|PRINT CARD SETUP
   --#title|[&WeaponName]
-  --#leftsub|[&WeaponType]
-  --#rightsub|[&DamageType]
+  --/|leftsub|[&WeaponType]
+  --/|rightsub|[&DamageType]
   --#emoteText|[*S:t-name] attacks [*T:t-name]
   --#emoteState|visible
 
@@ -270,17 +206,6 @@
   --/|Armor Rating Value (Armor Defense)
   --=TargetAD|[*T:t-bar[&ArmorRatingBar]_value]
   --&TargetADString|[*T:t-bar[&ArmorRatingBar]_value]
-
-  --/|Target Size; Uses "Temp Size" instead of Size
-  --&TargetSize|[*T:size2]
-  --?[&TargetSize] -ninc L|SmallMedium
-      --=DamageRoll|[*R:weapon_damagelarge][DMG_LG]
-      --&SizeDesc|LG
-  --^SkipSmallMedium|
-  --:SmallMedium|
-      --=DamageRoll|[*R:weapon_damagesmallmedium][DMG_SM]
-      --&SizeDesc|SM
-  --:SkipSmallMedium|
 
   --/|Armor Rating Adjustments; If ignore AR is checked, the "-" is read as a 0 adjustment. Otherwise if ARSetting is OFF, the adjustment is ignored for every attack.
   --=TargetBaseAC|[*T:t-bar[&ArmorClassBar]_value]
@@ -351,6 +276,17 @@
 
   --&DescRowText|
   --&DamageRowText|
+
+  --/|Target Size; Uses "Temp Size" instead of Size
+  --&TargetSize|[*T:size2]
+  --?[&TargetSize] -ninc L|SmallMedium
+      --=DamageRoll|[*R:weapon_damagelarge][DMG_LG]
+      --&SizeDesc|LG
+  --^SkipSmallMedium|
+  --:SmallMedium|
+      --=DamageRoll|[*R:weapon_damagesmallmedium][DMG_SM]
+      --&SizeDesc|SM
+  --:SkipSmallMedium|
 
 --/|STATUSMARKER ADJUSTMENTS
 
@@ -550,6 +486,24 @@
 
 
      --=TargetTouchAC|[$FinalTargetTouchAC] + [&ACMods] {MAX:10}
+
+
+--:MIRROR_IMAGE_CHECK|Looks for a [&MirrorImageStatusmarker] statusmarker.
+     -->CHECK_STATUS_MARKER|[&TARGET_TOKEN_ID];[&MirrorImageStatusmarker];Exists;Counter
+
+     --?[&Exists] -eq 1|CHECK_FOR_IMAGE_ATTACK
+     --^NO_IMAGES|
+     --:CHECK_FOR_IMAGE_ATTACK|
+     --=CounterDecimal|[&Counter]
+
+     --=NumberOfImagesPlusCaster|[$CounterDecimal] + 1
+     --=ImageAttacked|1d[$NumberOfImagesPlusCaster]
+
+
+     --?[$CounterDecimal] -gt 0|&ImageAttack;yes
+     --?[$ImageAttacked] -eq 1|&ImageAttack;no
+     --?[&ImageAttack] -eq no|&ImageTarget;caster
+     --:NO_IMAGES|
 
   --:SkipStatusChecks|
 
@@ -754,11 +708,18 @@
 
   --:Hit|
   --&HitText|Hit!
-  --&ColoredRow1|[&trStyleGreen]
+  --&ColoredRow1|[h4]
   --&DamageRowText|[b]Damage[/b] [$AdjustedDamageRoll] vs. [&SizeDesc] ([$DamageRoll])
   --?[&WeapDescText] -inc OFF|SkipDescText
       --&DescRowText|[*R:weapon_notes]
   --:SkipDescText|
+
+  --/|MIRROR IMAGE FINAL CHECK
+  --?[&ImageAttack] -eq yes|[
+        -->MIRROR_IMAGE_ON_HIT|
+        --&OutofAmmo|You Destroyed A Mirror Image!
+        --^PrintCard|
+        --]|
 
   --/|Apply Damage to Token
   --?[&ApplyDamagetoToken] -ninc ON|SkipDeadX
@@ -772,58 +733,41 @@
   --^PrintCard|
 
   --:Miss|
-  --&ColoredRow1|[&trStyleRed]
+  --&ColoredRow1|[h5]
   --&HitText|Miss!
 
   --:PrintCard|
 
   --/|Out of Ammo Msg
   --?"X[&OutofAmmo]" -eq X|PrintNormalCard
-      --&ColoredRow1|[&trStyleRed]
-      --&OutofAmmoChatCard|
-        [t [&tStyle1]]
-        [tr [&ColoredRow1]][td [&tdStyleCenter]][&OutofAmmo][&EndRow]
-        [/t]
+      --&ColoredRow1|[h5]
+      --&OutofAmmoChatCard|[&ColoredRow1][&OutofAmmo]
       --+|[&OutofAmmoChatCard]
   --X|
 
   --:PrintNormalCard|
-  --&ChatCard|
-      [t [&tStyle1]]
-      [tr [&trStyle1st]][td [&tdStyle1st]][&AttackCard1][&EndRow]
-      [tr [&ColoredRow1]][td [&tdStyleCenter]][&HitText][&EndRow]
-      [/t]
+  --&ChatCard|[h1][&AttackCard1]
+  --&ChatCard2|[&ColoredRow1][&HitText]
 
-  --&WeaponDataRowCard|
-      [t [&tStyle1]]
-      [&DataRowCenter][&WeaponDataRowText][&EndRow]
-      [/t]
+  --&WeaponDataRowCard|[h3][&WeaponDataRowText]
 
-  --&DamageCard|
-      [t [&tStyle1]]
-      [&LeftRowEven][&DamageRowText][&EndRow]
-      [/t]
+  --&DamageCard|[h1][&DamageRowText]
 
-  --&WeaponDescCard|
-      [t [&tStyle1]]
-      [&LeftRowOdd][&DescRowText][&EndRow]
-      [/t]
+  --&WeaponDescCard|[h1][&DescRowText]
 
-  --&BackstabCard|
-      [t [&tStyle1]]
-      [&TextRowCenter][&BackstabText][&EndRow]
-      [/t]
+  --&BackstabCard|[h2][&BackstabText]
 
   --/|Attack Card
 
   --?[$AttackCounter] -ne 1|SKIP_ATTACK_COUNTER_DISPLAY
   --?[&params2] -eq 1|SKIP_ATTACK_COUNTER_DISPLAY
 
-  --+|[t [&tStyle1]][&TextRowCenter]Attack #[$AttackCounter.Raw][&EndRow][/t]
+  --+|[h2]Attack #[$AttackCounter.Raw]
 
   --:SKIP_ATTACK_COUNTER_DISPLAY|
 
   --+|[&ChatCard]
+  --+|[&ChatCard2]
 
   --?"X[*R:weapon_speed]" -eq X -and "[&WeaponType]" -inc Melee|SkipWeaponDataText
   --?"X[*R:weapon_speed]" -eq X -and "[&WeaponType]" -inc Touch|SkipWeaponDataText
@@ -845,13 +789,84 @@
   --?[$AttacksRemaining] -le 0|DONE_REPEATING_ATTACKS
 
   --=AttackCounter|[$AttackCounter.Raw] + 1
-  --+|[t [&tStyle1]][&TextRowCenter]Attack #[$AttackCounter.Raw][&EndRow][/t]
+  --?[$AreThereMultipleAttackers] -lt 2|SkipMultipleAttackerPrint
+  --+|[h1]Attack #[$AttackCounter.Raw]
+  --:SkipMultipleAttackerPrint|
 
   --^REPEAT_ATTACK|
 
   --:DONE_REPEATING_ATTACKS|
 
   --X|
+
+  --:MIRROR_IMAGE_ON_HIT|
+
+  --&ImageTarget|image
+  --=NewNumberofImages|[$CounterDecimal] - 1
+  -->REMOVE_STATUS_MARKER|[&TARGET_TOKEN_ID];[&MirrorImageStatusmarker]
+  -->ADD_STATUS_MARKER|[&TARGET_TOKEN_ID];[&MirrorImageStatusmarker];[$NewNumberofImages]
+
+  --:REMOVE_STATUS_MARKER_IF_NO_IMAGES|
+  -->CHECK_STATUS_MARKER|[&TARGET_TOKEN_ID];[&MirrorImageStatusmarker];Exists;Counter
+  --?[&Counter] -gt 0|SKIP_REMOVE
+  -->REMOVE_STATUS_MARKER|[&TARGET_TOKEN_ID];[&MirrorImageStatusmarker]
+  --:SKIP_REMOVE|
+  --<|
+
+  --/|STATUS MARKER FUNCTIONS (New! So only one part of the attack script uses it for now)
+  --:ADD_STATUS_MARKER|Token_ID;Status Marker;Count
+  -->REMOVE_STATUS_MARKER|[%1%];[%2%]
+  --~|array;statusmarkers;Conditions;[%1%]
+  --&toAdd|[%2%]
+  --?"[%2%]" -ne "dead" -and "X[%3%]" -ne "X" -and "X[%3%]" -ne "X0"|=countToAdd;[%3%] {MIN:0} {MAX:9}
+  --?"[%2%]" -ne "dead" -and "X[%3%]" -ne "X" -and "X[%3%]" -ne "X0"|&toAdd;[%2%]@[$countToAdd.Raw]
+  --~|array;add;Conditions;[&toAdd]
+  --~newConditions|array;stringify;Conditions
+  --#parameterdelimiter|$
+  --~newConditions|string$replaceall$;$,$[&newConditions]
+  --#parameterdelimiter|;
+  --?"[&newConditions(0,1)]" -eq ","|&newConditions;[&newConditions(1)]
+  --!t:[%1%]|statusmarkers:[&newConditions]
+  --:DONE_ADD_STATUS_MARKER|
+  --<|
+
+  --:REMOVE_STATUS_MARKER|Token_ID;Status Marker
+  -->CHECK_STATUS_MARKER|[%1%];[%2%];MarkerExists;MarkerCounter
+  --?[&MarkerExists] -eq 0|<
+  --~|array;statusmarkers;Conditions;[%1%]
+  --?[&MarkerCounter] -eq 0|&toCheckFor;[%2%]|&toCheckFor;[%2%]@[&MarkerCounter]
+  --~hasCondition|array;indexof;Conditions;[&toCheckFor]
+  --?[&hasCondition] -eq "ArrayError"|DONE_REMOVE_STATUS_MARKER
+  --~|array;remove;Conditions;[&toCheckFor]
+  --~newConditions|array;stringify;Conditions
+  --#parameterdelimiter|$
+  --~newConditions|string$replaceall$;$,$[&newConditions]
+  --#parameterdelimiter|;
+  --!t:[%1%]|statusmarkers: [&newConditions]
+  --:DONE_REMOVE_STATUS_MARKER|
+  --<|
+
+  --:CHECK_STATUS_MARKER|TokenID;MarkerToFind;Exists;Counter
+  --~|array;statusmarkers;Conditions;[%1%]
+  --&FoundMarker|-1
+  --%loop|0;[@Conditions(maxindex)]
+    --&Temp|[@Conditions([&loop])]
+  --?[&Temp(indexof,[%2%])] -eq 0|&FoundMarker;[&loop]
+  --%|
+  --?[&FoundMarker] -ne -1|FOUND_STATUS_MARKER
+  --&[%3%]|0 --&[%4%]|0 --<|
+  --:FOUND_STATUS_MARKER|
+  --&[%3%]|1
+  --&[%4%]|0
+  --&ThisMarker|[@Conditions([&FoundMarker])]
+  --?[&ThisMarker(contains,@)] -eq 0|<
+  --~[%4%]|string;after;@;[@Conditions([&FoundMarker])]
+  --<|
+
+  --:CLEAR_STATUS_MARKERS|TokenID
+  --!t:[%1%]|statusmarkers:|
+  --<|
+
   --/|End Script
 
   }}
