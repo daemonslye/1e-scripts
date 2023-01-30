@@ -3,7 +3,7 @@
 --/|Script Name: Use-Magic-Item
 --/|Location: CharacterScripts
 
---/|Version: 2022.11.09.001
+--/|Version: 2023.01.27.001
 
 --/|SETTINGS SECTION
 --/|==============================================================================================================
@@ -126,16 +126,12 @@
       --&ItemName|
       --&ItemName|+[*R:equipment_item]
 
-      --?"[*S:t-tooltip]" -inc "pc-control"|SkipWhisper|
-      --?[*S:is_npc] -eq 1|&WhisperTo;gm
-      --:SkipWhisper|
-
-      --#whisper|[&WhisperTo]
+      --#whisper|[&WHISPER_TO]
 
       --=ChargesUsed|1
 
       --?"[*R:equipment_item]" -inc heal|[
-          --iTo use a Potion of Extra-Healing or Healing, please click Cure-Heal Instead;Don't Click This|q;Wasted;You're Wasting Your Time|
+          --+|[h1]Please use Player-Menu > Add an Item to properly add a healing potion before using it.
           --X|
           --]|
 
@@ -145,6 +141,8 @@
 
       --?"[*R:equipment_location]" -ninc scroll|[
       --i;How Many Uses/Charges|q;ChargesUsed;How Many Uses/Charges to Use?|1
+      --=ChargesUsed|[&ChargesUsed]
+
       --]|
 
       --=ItemCurrentUsesBefore|[*R:equipment_current]
@@ -181,7 +179,7 @@
             --^SkipDecrement|
             --]|
 
-        --@setattr| _charid [*S:character_id] _modb _[*R>equipment_current]|-1 _silent
+        --@setattr| _charid [*S:character_id] _modb _[*R>equipment_current]|-[$ChargesUsed] _silent
 
         --?[*R>equipment_current^] -eq u|SkipDeleteRow
         --?[&DontDelete] -eq yes|SkipDeleteRow
