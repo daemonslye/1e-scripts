@@ -3,7 +3,7 @@
 --/|Script Name: Ability-Check
 --/|Location: CharacterScripts
 
---/|Version: 2022.11.16.001
+--/|Version: 2022.12.14.001 // added whisper to cha checks
 
 --/|FORMATTING SECTION
 --/|==============================================================================================================
@@ -50,6 +50,7 @@
   --&SpellName|[&params3]
 
   --/|DIFFICULTY CHECK ROLL
+  --#whisper|self,gm
   --?"X[$DC]" -eq X|SkipDC
   --?"X[$DC]" -eq X0|SkipDC
   --?"[$DC]" -eq false|SkipDC
@@ -101,6 +102,7 @@
           --&MajorResultLine|[h4][&MajorResult]
           --]|
       --/|PRINT CARD
+      --#whisper|self,gm
       --#title|[*S:t-name]'s Strength Check
       --+|[h1][&FirstLine]
       --+|[&MinorResultLine]
@@ -120,7 +122,7 @@
         --&CompResultLine|[h4][&CompResult]
         --]|
     --/|PRINT CARD
-    --#whisper|
+    --#whisper|self,gm
     --#title|[*S:t-name]'s Comprehend Check
     --+|[h1][&FirstLine]
     --+|[h2][b]Spell:[/b] [&SpellName]
@@ -143,7 +145,7 @@
         --&WisResultLine|[h4][&WisResult]
         --]|
     --/|PRINT CARD
-    --#whisper|
+    --#whisper|self,gm
     --#title|[*S:t-name]'s Priest Spell Failure Check
     --+|[h1][&FirstLine]
     --+|[&WisResultLine]
@@ -159,7 +161,7 @@
         --&DexResultLine|[h4][&DexResult]
         --]|
     --/|PRINT CARD
-    --#whisper|
+    --#whisper|self,gm
     --#title|[*S:t-name]'s Dexterity Check
     --+|[h1][&FirstLine]
     --+|[&DexResultLine]
@@ -183,7 +185,7 @@
             --&ResurrectSaveResultLine|[h4][&ResurrectSaveResult][&EndRow]
             --]|
     --/|PRINT CARD
-    --#whisper|
+    --#whisper|self,gm
     --#title|[*S:t-name]'s System/Resurrect Save
     --+|[h1][&FirstLine]
     --+|[&SystemSaveResultLine]
@@ -236,6 +238,7 @@
                 --]|
 
             --/|PRINT CARD
+            --eGM|/w [&SendingPlayerName] [*S:t-name] attempts an Encounter Reaction/Loyalty check
             --#whisper|gm
             --#title|Loyalty/Reaction Check ([*S:t-name])
             --+|[h1][&FirstLine]
