@@ -1,0 +1,233 @@
+!script {{
+
+--/|Script Name: GM-Menu
+
+--/|Version: 2022.01.29.001 // added combat controls
+
+--/|SETTINGS SECTION
+--/|==============================================================================================================
+
+--&IMMOBILE_MARKER|immobile::5465267
+
+--/|FORMATTING SECTION
+--/|==============================================================================================================
+--#overridetemplate|VileDarkness_TextButtons
+--#emoteBackground|#f2f2f3
+--#emoteFont|"Contrail One"
+--#emoteFontColor|#4d1635
+--#emoteFontWeight|regular
+--#emoteFontSize|16px
+--#buttonBackground|#4d1635
+--#buttonFontFace|Tahoma
+--#buttonFontSize|14px
+
+--/|SCRIPT
+--/|==============================================================================================================
+
+--#reentrant|AD&D1E_GM_Menu
+
+--:PrintGMButtons|
+--#whisper|self
+--#emoteState|off
+--#title|Game Master Menu
+--+|[h1][b]Combat Controls[/b]
+--+|[h2][sheetbutton]1. Surprise::GameScripts::Surprise[/sheetbutton]
+--+|[h1][sheetbutton]2. Start Initiative Tracker::GameScripts::ITP-Start[/sheetbutton]
+--+|[h2][rbutton]3. Add Declare Step::RUN_GM_SCRIPTS;AddDeclare[/rbutton]
+--+|[h1][sheetbutton]4. Declare Action::CharacterScripts::Declare[/sheetbutton]
+--+|[h2][sheetbutton]5. Roll Initiative::GameScripts::Monster-Initiative[/sheetbutton]
+--+|[h1][sheetbutton]6. Update Turn::CharacterScripts::Update-Turn[/sheetbutton]
+--+|[h2][sheetbutton]7. Sort Turn Tracker::GameScripts::Sort-Turns[/sheetbutton]
+--+|[h1][sheetbutton]8. Add Effect to Tracker::CharacterScripts::Add-Effect[/sheetbutton]
+--+|[h2][sheetbutton]9. Morale::GameScripts::Morale[/sheetbutton]
+--+|[h1][rbutton]10. Remove Aura & Immobility::RUN_GM_SCRIPTS;RemoveAura|&#64;{target|token_id}[/rbutton]
+--+|[h2][b]Playing the Game[/b]
+--+|[h1][sheetbutton]Bump::GameScripts::Bump[/sheetbutton]
+--+|[h2][sheetbutton]Grapple::CharacterScripts::Grapple[/sheetbutton]
+--+|[h1][sheetbutton]Magic Resistance::CharacterScripts::Magic-Resistance[/sheetbutton]
+--+|[h2][sheetbutton]Monster Saves::GameScripts::Monster-Saves[/sheetbutton]
+--+|[h1][sheetbutton]Roll Dice::CharacterScripts::Roll-Dice[/sheetbutton]
+--+|[h2][sheetbutton]Senses Menu::GameScripts::Senses-Menu[/sheetbutton]
+--+|[h1][sheetbutton]Shield::CharacterScripts::Shield[/sheetbutton]
+--+|[h2][sheetbutton]Shield for Shared Sheets::GameScripts::Shield-NPC[/sheetbutton]
+--+|[h1][sheetbutton]Use Magic Item::CharacterScripts::Use-Magic-Item[/sheetbutton]
+--+|[h2][b]Spells[/b]
+--+|[h1][sheetbutton]Review Spells::CharacterScripts::Review-Spell[/sheetbutton]
+--+|[h2][sheetbutton]Prepare Spells::CharacterScripts::Prepare-Spells[/sheetbutton]
+--+|[h1][sheetbutton]Cast Spell::CharacterScripts::Cast-Spell[/sheetbutton]
+--+|[h2][sheetbutton]Set AOE::CharacterScripts::Set-AOE[/sheetbutton]
+--+|[h1][b]GM Controls[/b]
+--+|[h2][sheetbutton]Add Effect to Tracker::CharacterScripts::Add-Effect[/sheetbutton]
+--+|[h1][sheetbutton]Add Numbers to Token Names::GameScripts::Token-Rename[/sheetbutton]
+--+|[h2][sheetbutton]Change Control::GameScripts::Change-Control[/sheetbutton]
+--+|[h1][rbutton]Clear Tracker::RUN_GM_SCRIPTS;ClearTracker|[/rbutton]
+--+|[h2][sheetbutton]Creature Stat Block::CharacterScripts::Creature-Stat-Block[/sheetbutton]
+--+|[h1][sheetbutton]Roll Confusion Saves & Actions::SpellScripts::Confusion-Effect[/sheetbutton]
+--+|[h2][sheetbutton]ITP Reset::GameScripts::ITP-Reset[/sheetbutton]
+--+|[h1][sheetbutton]ITP Start::GameScripts::ITP-Start[/sheetbutton]
+--+|[h2][sheetbutton]ITP Stop::GameScripts::ITP-Stop[/sheetbutton]
+--+|[h1][sheetbutton]Light::CharacterScripts::Light-Carried[/sheetbutton]
+--+|[h2][rbutton]Remove Aura & Immobility::RUN_GM_SCRIPTS;RemoveAura|&#64;{target|token_id}[/rbutton]
+--+|[h1][sheetbutton]Remove Tint::GameScripts::Remove-Tint[/sheetbutton]
+--+|[h2][sheetbutton]Statusmarker Add::CharacterScripts::Statusmarkers-Add[/sheetbutton]
+--+|[h1][sheetbutton]Statusmarker Remove::CharacterScripts::Statusmarkers-Remove[/sheetbutton]
+--+|[h2][sheetbutton]Statusmarker Remove ALL::GameScripts::Statusmarkers-Remove[/sheetbutton]
+--+|[h1][sheetbutton]Vision::GameScripts::Vision-GM[/sheetbutton]
+--+|[h2][b]Maintenance[/b]
+--+|[h1][sheetbutton]Add Item/Ability/Spell::CharacterScripts::Add-to-Sheet[/sheetbutton]
+--+|[h2][sheetbutton]Add Melee::CharacterScripts::Add-Melee-Weapon[/sheetbutton]
+--+|[h1][sheetbutton]Add Missile::CharacterScripts::Add-Missile-Weapon[/sheetbutton]
+--+|[h2][sheetbutton]Add Script::CharacterScripts::Add-Script[/sheetbutton]
+--+|[h1][sheetbutton]Check AAC0::GameScripts::Check-Attack-Matrix[/sheetbutton]
+--+|[h2][sheetbutton]Resize Token::GameScripts::Resize-Token[/sheetbutton]
+--+|[h1][sheetbutton]Set Resistances::CharacterScripts::Set-Resistance[/sheetbutton]
+--+|[h2][sheetbutton]Setup Token::GameScripts::Setup-Token[/sheetbutton]
+--+|[h1][sheetbutton]Vision Report::GameScripts::Vision-Report[/sheetbutton]
+
+--X|
+
+--:RUN_GM_SCRIPTS| Reentrant Point
+
+--~params|string;split;|;[&reentryval]
+--^[&params1]|
+--+params|[&params1][&params2]
+
+--+whoops|
+--X|
+
+--:AddDeclare|
+--#hideTitleCard|1
+--~|turnorder;addcustom;Declare Actions;99
+--X|
+
+--:ClearTracker|
+--#hideTitleCard|1
+--~|turnorder;clear
+--X|
+
+--:RemoveAura|
+--#hideTitleCard|1
+--*id|[&params2]
+--*token|[&STUNNED_TOKEN]
+--!t:[&params2]|aura2_radius:0|aura2_color|ff0000|showplayers_aura2:off
+-->REMOVE_STATUS_MARKER|[&params2];[&IMMOBILE_MARKER]
+--X|
+
+--:StartITP|
+--#hideTitleCard|1
+--@itp|-start
+--X|
+
+--:StopITP|
+--#hideTitleCard|1
+--@itp|-stop
+--X|
+
+--:ResetITP|
+--#hideTitleCard|1
+--i;Enter Round Number|q;RoundNumber;Enter Round Number (leave blank for general reset)|
+--@itp|-reset [&RoundNumber]
+--X|
+
+  --/|Functions     : The following functions are meant to be called by your script.
+  --/|
+  --/|                CHECK_STATUS_MARKER - TokenID;MarkerToFind;ExistsVariable;CountVariable
+  --/|                     Will check the given token (TokenID) for the status marker (MarkerToFind) and set two return
+  --/|                     string variables: (ExistsVariable) will be 1 if the token has the marker, and (CountVariable)
+  --/|                     will contain the counter number on the marker (default 0 for no number)
+  --/||
+  --/|                REMOVE_STATUS_MARKER - TokenID;MarkerToRemove
+  --/|                     Will remove any variation of (MarkerToRemove from the given token (TokenID)
+  --/|
+  --/|                ADD_STATUS_MARKER - TokenID;MarkerToAdd;Count
+  --/|                     Will add (MarkerToAdd) to the given token (TokenID). If count is specified with a number
+  --/|                     betweeen 1 and 9, the number will be placed on top of the status marker.
+  --/|                DECREMENT_STATUS_MARKER - TokenID;MarkerToDecrement;Blank, 0 or 1 (OPTIONAL)
+  --/|                     If (MarkerToDecrement) exists on the on token (TokenID), the counter number will be
+  --/|                     decreased by 1. If a third parameter is added and set to 1, the status marker will
+  --/|                     be removed when decrementing from 1 to no counter. If set to 0, the marker will be
+  --/|                     be removed when decrementing for a marker without a counter. If not specified, the
+  --/|                     marker will not be removed when the counter would go below 1 or 0.
+  --/|
+  --/|                CLEAR_STATUS_MARKERS - TokenID
+  --/|                     Removes all status markers from the indicated token.
+
+  --/|The commented out lines below are just samples of calling some of the functions in this script.
+
+  --/|Remove all status markers from the selected token
+  --/>CLEAR_STATUS_MARKERS|{selected|token_id}
+
+  --/|Add the "snail" status marker with a counter of 5 to the selected token
+  --/>ADD_STATUS_MARKER|{selected|token_id};snail;5
+
+  --/|Decrement the counter on the "snail" status marker on the selected token, removing it if the number goes below 1
+  --/>DECREMENT_STATUS_MARKER|{selected|token_id};snail;1
+
+  --X|
+
+  --:ADD_STATUS_MARKER|Token_ID;Status Marker;Count
+  -->REMOVE_STATUS_MARKER|[%1%];[%2%]
+  --~|array;statusmarkers;Conditions;[%1%]
+  --&toAdd|[%2%]
+  --?"[%2%]" -ne "dead" -and "X[%3%]" -ne "X" -and "X[%3%]" -ne "X0"|=countToAdd;[%3%] {MIN:0} {MAX:9}
+  --?"[%2%]" -ne "dead" -and "X[%3%]" -ne "X" -and "X[%3%]" -ne "X0"|&toAdd;[%2%]@[$countToAdd.Raw]
+  --~|array;add;Conditions;[&toAdd]
+  --~newConditions|array;stringify;Conditions
+  --#parameterdelimiter|$
+  --~newConditions|string$replaceall$;$,$[&newConditions]
+  --#parameterdelimiter|;
+  --?"[&newConditions(0,1)]" -eq ","|&newConditions;[&newConditions(1)]
+  --!t:[%1%]|statusmarkers:[&newConditions]
+  --:DONE_ADD_STATUS_MARKER|
+  --<|
+
+  --:REMOVE_STATUS_MARKER|Token_ID;Status Marker
+  -->CHECK_STATUS_MARKER|[%1%];[%2%];MarkerExists;MarkerCounter
+  --?[&MarkerExists] -eq 0|<
+  --~|array;statusmarkers;Conditions;[%1%]
+  --?[&MarkerCounter] -eq 0|&toCheckFor;[%2%]|&toCheckFor;[%2%]@[&MarkerCounter]
+  --~hasCondition|array;indexof;Conditions;[&toCheckFor]
+  --?[&hasCondition] -eq "ArrayError"|DONE_REMOVE_STATUS_MARKER
+  --~|array;remove;Conditions;[&toCheckFor]
+  --~newConditions|array;stringify;Conditions
+  --#parameterdelimiter|$
+  --~newConditions|string$replaceall$;$,$[&newConditions]
+  --#parameterdelimiter|;
+  --!t:[%1%]|statusmarkers: [&newConditions]
+  --:DONE_REMOVE_STATUS_MARKER|
+  --<|
+
+  --:DECREMENT_STATUS_MARKER|Token_ID;Status Marker;Optional:0=remove marker if decrementing from 0 or 1=Remove marker if decrementing TO 0.
+  -->CHECK_STATUS_MARKER|[%1%];[%2%];_DEC_EXIST;_DEC_COUNT
+  --?[&_DEC_EXIST] -eq 0|DONE_DECREMENT_STATUS_MARKER
+  --?[&_DEC_COUNT] -eq 0 -and "X[%3%]" -eq "X"|DONE_DECREMENT_STATUS_MARKER
+  -->REMOVE_STATUS_MARKER|[%1%];[%2%]
+  --?[&_DEC_COUNT] -eq 1 -and "X[%3%]" -eq "X1"|DONE_DECREMENT_STATUS_MARKER
+  --?[&_DEC_COUNT] -eq 0 -and "X[%3%]" -eq "X0"|DONE_DECREMENT_STATUS_MARKER
+  --?[&_DEC_COUNT] -gt 1|>ADD_STATUS_MARKER;[%1%];[%2%];[=[&_DEC_COUNT]-1]
+  --?[&_DEC_COUNT] -eq 1|>ADD_STATUS_MARKER;[%1%];[%2%]
+  --:DONE_DECREMENT_STATUS_MARKER|
+  --<|
+
+  --:CHECK_STATUS_MARKER|TokenID;MarkerToFind;Exists;Counter
+  --~|array;statusmarkers;Conditions;[%1%]
+  --&FoundMarker|-1
+  --%loop|0;[@Conditions(maxindex)]
+    --&Temp|[@Conditions([&loop])]
+	--?[&Temp(indexof,[%2%])] -eq 0|&FoundMarker;[&loop]
+  --%|
+  --?[&FoundMarker] -ne -1|FOUND_STATUS_MARKER
+  --&[%3%]|0 --&[%4%]|0 --<|
+  --:FOUND_STATUS_MARKER|
+  --&[%3%]|1
+  --&[%4%]|0
+  --&ThisMarker|[@Conditions([&FoundMarker])]
+  --?[&ThisMarker(contains,@)] -eq 0|<
+  --~[%4%]|string;after;@;[@Conditions([&FoundMarker])]
+  --<|
+
+  --:CLEAR_STATUS_MARKERS|TokenID
+  --!t:[%1%]|statusmarkers:|
+  --<|
+
+}}
