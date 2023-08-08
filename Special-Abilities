@@ -3,7 +3,7 @@
 --/|Script Name: Special-Abilities
 --/|Location: CharacterScripts
 
---/|Version: 2022.11.17.001
+--/|Version: 2023.05.22.001 // adding an emote
 
 --/|SETTINGS SECTION
 --/|==============================================================================================================
@@ -30,6 +30,8 @@
 --/|==============================================================================================================
 
 --#reentrant|Special_Abilities_Menu_@{selected|character_id}
+
+--&ABILITYSCRIPTMULE|AbilityScripts
 
   --#whisper|self
   --#title|@{selected|token_name}'s Special Abilities
@@ -61,7 +63,7 @@
       --&Button|[rbutton][*R:ability_name] ([&NumUses][&Slash][&UsesMax])::USE_ABILITY;[=[$Count.Raw] - 1][/rbutton]
       --^SkipSheetButton|
       --:MakeSheetButton|
-      --&Button|[sheetbutton][*R:ability_name] ([&NumUses][&Slash][&UsesMax])::AbilityScripts::[*R:ability_name][/sheetbutton]
+      --&Button|[button][*R:ability_name] ([&NumUses][&Slash][&UsesMax])::~[&ABILITYSCRIPTMULE]|[*R:ability_name][/button]
       --:SkipSheetButton|
       --&PrintButtons|+ [&1stRowFormat][&Button][&EndRow]
       --=Count|[$Count] + 1
@@ -77,7 +79,7 @@
   --:USE_ABILITY|
 
   --#whisper|
-  --#emoteState|invisible
+  --#emoteState|visible
 
   --/|USE BUTTON VALUES
 
@@ -119,6 +121,9 @@
     --:SkipDecrement|
 
   --:PRINT|
+  --?"[&AbilityName]" -eq Educated|&AbilityName;an Educated Check
+  --#emoteText|[*S:t-name] uses [&AbilityName]!
+  --?"[&AbilityName]" -inc Educated|&AbilityName;Educated Check
   --#title|[&AbilityName]
   --+|[h1][&RollLine][&EndRow]
   --+|[h2][b]Uses Left:[/b] [&Uses]
