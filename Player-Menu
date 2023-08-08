@@ -3,7 +3,7 @@
 --/|Script Name: Player-Menu
 --/|Location: CharacterScripts
 
---/|Version: 2022.01.09.001
+--/|Version: 2023.07.04.001 // compressed format
 
 --/|SETTINGS SECTION
 --/|==============================================================================================================
@@ -11,7 +11,7 @@
 
 --/|FORMATTING SECTION
 --/|==============================================================================================================
---#overridetemplate|VileDarkness_TextButtons
+--#overridetemplate|VileDarkness_PerDay
 --#emoteBackground|#f2f2f3
 --#emoteFont|"Contrail One"
 --#emoteFontColor|#4d1635
@@ -24,48 +24,53 @@
 --/|SCRIPT
 --/|==============================================================================================================
 
+--&CHARACTERSCRIPTSMULE|CharacterScripts
+--&SPELLSCRIPTSMULE|SpellScripts
+
 --#reentrant|AD&D1E_Player_Menu
 
 --:PrintGMButtons|
 --#whisper|self
 --#emoteState|off
 --#title|Player Menu
---+|[h1][b]INITIATIVE[/b]
---+|[h2][sheetbutton]Declare::CharacterScripts::Declare[/sheetbutton]
---+|[h1][sheetbutton]Update Turn::CharacterScripts::Update-Turn[/sheetbutton]
---+|[h2][sheetbutton]Roll Initiative::CharacterScripts::Roll-Initiative[/sheetbutton]
---+|[h1][b]COMBAT[/b]
---+|[h2][sheetbutton]Attack Menu::CharacterScripts::Attack-Menu[/sheetbutton]
---+|[h1][sheetbutton]Save Menu::CharacterScripts::Save-Menu[/sheetbutton]
---+|[h2][sheetbutton]Roll Dice::CharacterScripts::Roll-Dice[/sheetbutton]
---+|[h1][b]ACTIONS[/b]
---+|[h2][sheetbutton]Ability Check::CharacterScripts::Ability-Check[/sheetbutton]
---+|[h1][sheetbutton]Bump::CharacterScripts::Bump[/sheetbutton]
---+|[h2][sheetbutton]Engage/Disengage Shield::CharacterScripts::Shield[/sheetbutton]
---+|[h1][sheetbutton]Grapple::CharacterScripts::Grapple[/sheetbutton]
---+|[h2][sheetbutton]Light::CharacterScripts::Light-Carried[/sheetbutton]
---+|[h1][sheetbutton]Magic Resistance Check::CharacterScripts::Magic-Resistance[/sheetbutton]
---+|[h2][sheetbutton]Special Abilities::CharacterScripts::Special-Abilities[/sheetbutton]
---+|[h1][sheetbutton]Use Magic Item::CharacterScripts::Use-Magic-Item[/sheetbutton]
---+|[h2][sheetbutton]Vision::CharacterScripts::Vision[/sheetbutton]
---+|[h1][b]SPELLS[/b]
---+|[h2][sheetbutton]Review Spells::CharacterScripts::Review-Spell[/sheetbutton]
---+|[h1][sheetbutton]Prepare Spells::CharacterScripts::Prepare-Spells[/sheetbutton]
---+|[h2][sheetbutton]Prepare Spells Multi::CharacterScripts::Prepare-Spells-Multi[/sheetbutton]
---+|[h1][sheetbutton]Cast Spell::CharacterScripts::Cast-Spell[/sheetbutton]
---+|[h2][sheetbutton]Set AOE::SpellScripts::Set-AOE[/sheetbutton]
---+|[h1][b]MAINTENANCE[/b]
---+|[h2][sheetbutton]Add Item/Ability/Spell::CharacterScripts::Add-to-Sheet[/sheetbutton]
---+|[h1][sheetbutton]Add Melee Weapon::CharacterScripts::Add-Melee-Weapon[/sheetbutton]
---+|[h2][sheetbutton]Add Missile Weapon::CharacterScripts::Add-Missile-Weapon[/sheetbutton]
---+|[h1][sheetbutton]Add Script to Sheet::CharacterScripts::Add-Script[/sheetbutton]
---+|[h2][sheetbutton]Creature Stat Block::CharacterScripts::Creature-Stat-Block[/sheetbutton]
---+|[h1][sheetbutton]Statusmarker Add::CharacterScripts::Statusmarkers-Add[/sheetbutton]
---+|[h2][sheetbutton]Statusmarker Remove::CharacterScripts::Statusmarkers-Remove[/sheetbutton]
---+|[h1][sheetbutton]Set Resistances::CharacterScripts::Set-Resistance[/sheetbutton]
+--+|[h2][b]INITIATIVE[/b]
+--+|[button]Declare::~[&CHARACTERSCRIPTSMULE]|Declare[/button][br]
+--+|[button]Roll Initiative::~[&CHARACTERSCRIPTSMULE]|Initiative-Roll[/button][br]
+
+--+|[h2][b]COMBAT[/b]
+--+|[button]Attack Menu::~[&CHARACTERSCRIPTSMULE]|Attack-Menu[/button][br]
+--+|[button]Save Menu::~[&CHARACTERSCRIPTSMULE]|Save-Menu[/button][br]
+--+|[button]Roll Dice::~[&CHARACTERSCRIPTSMULE]|Roll-Dice[/button][br]
+
+--+|[h2][b]ACTIONS[/b]
+--+|[button]Ability Check::~[&CHARACTERSCRIPTSMULE]|Ability-Check[/button][br]
+--+|[button]Bump::~[&CHARACTERSCRIPTSMULE]|Bump[/button][br]
+--+|[button]Engage/Disengage Shield::~[&CHARACTERSCRIPTSMULE]|Shield[/button][br]
+--+|[button]Grapple::~[&CHARACTERSCRIPTSMULE]|Grapple[/button][br]
+--+|[button]Light::~[&CHARACTERSCRIPTSMULE]|Light-Carried[/button][br]
+--+|[button]Magic Resistance Check::~[&CHARACTERSCRIPTSMULE]|Magic-Resistance[/button][br]
+--+|[button]Special Abilities::~[&CHARACTERSCRIPTSMULE]|Special-Abilities[/button][br]
+--+|[button]Use Magic Item::~[&CHARACTERSCRIPTSMULE]|Use-Magic-Item[/button][br]
+--+|[button]Vision::~[&CHARACTERSCRIPTSMULE]|Vision[/button][br]
+
+--+|[h2][b]SPELLS[/b]
+--+|[button]Cast Spell::~[&CHARACTERSCRIPTSMULE]|Cast-Spell[/button][br]
+--+|[button]Prepare Spells::~[&CHARACTERSCRIPTSMULE]|Prepare-Spells[/button][br]
+--+|[button]Set AOE::~[&SPELLSCRIPTSMULE]|Set-AOE[/button][br]
+--+|[button]Add Effect to Tracker::~[&CHARACTERSCRIPTSMULE]|Add-Effect[/button][br]
+
+--+|[h2][b]MAINTENANCE[/b]
+--+|[button]Add Equipment::~[&CHARACTERSCRIPTSMULE]|Add-Equipment[/button][br]
+--+|[button]Add Item/Ability/Spell::~[&CHARACTERSCRIPTSMULE]|Add-to-Sheet[/button][br]
+--+|[button]Add Melee Weapon::~[&CHARACTERSCRIPTSMULE]|Add-Melee-Weapon[/button][br]
+--+|[button]Add Missile Weapon::~[&CHARACTERSCRIPTSMULE]|Add-Missile-Weapon[/button][br]
+--+|[button]Statusmarker Add::~[&CHARACTERSCRIPTSMULE]|Statusmarkers-Add[/button][br]
+--+|[button]Statusmarker Remove::~[&CHARACTERSCRIPTSMULE]|Statusmarkers-Remove[/button][br]
+--+|[button]Set Resistances::~[&CHARACTERSCRIPTSMULE]|Set-Resistance[/button][br]
+
 --+|[h2][b]CHARACTER CREATION[/b]
---+|[h1][sheetbutton]Generate Ability Scores::CharacterScripts::Generate-Ability-Scores[/sheetbutton]
---+|[h2][sheetbutton]Generate Character Details::CharacterScripts::Generate-Character-Details[/sheetbutton]
+--+|[button]Generate Ability Scores::~[&CHARACTERSCRIPTSMULE]|Generate-Ability-Scores[/button][br]
+--+|[button]Generate Character Details::~[&CHARACTERSCRIPTSMULE]|Generate-Character-Details[/button][br]
 
 --X|
 
