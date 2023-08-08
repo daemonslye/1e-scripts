@@ -3,7 +3,7 @@
 --/|Script Name: Use-Magic-Item
 --/|Location: CharacterScripts
 
---/|Version: 2023.01.27.001
+--/|Version: 2023.06.12.001 // trying to change to buttons without initialize
 
 --/|SETTINGS SECTION
 --/|==============================================================================================================
@@ -35,6 +35,8 @@
   --#sourceToken|@{selected|token_id}
   --&SelectedID|[*S:character_id]
 
+  --&ITEMSCRIPTMULE|ItemScripts
+
   --=Count|1
   --&Buttons|
 
@@ -46,6 +48,8 @@
 
       --&PAREN1|(
       --&PAREN2|)
+
+      --&NumUses|
 
       --?"[*R:equipment_item]" -eq "NoRepeatingAttributeLoaded"|SkipItem
 
@@ -73,7 +77,7 @@
       --?"[*R:equipment_location]" -inc "Scroll-"|&ButtonColor;:#ffffff:#000000
       --:SkipUses|
       --?"[*R:equipment_description]" -inc "ItemScripts"|MakeItemSheetButton
-      --?"[*R:equipment_description]" -inc "SpellScripts"|MakeSpellSheetButton
+      --?"[*R:equipment_description]" -inc "ItemAbilities"|MakeSpellSheetButton
 
       --&Button|[rbutton[&ButtonColor]][*R:equipment_item] [&PAREN1][&NumUses][&Slash][&UsesMax][&PAREN2]::USE_ITEM;[=[$Count.Raw] - 1][/rbutton]
       --^SkipSheetButton|
@@ -82,11 +86,16 @@
       --&ScriptName|[*R:equipment_item]
       --&ButtonColor|:#000000:#F8C8DC
       --?"[*R:equipment_item]" -inc heal|&ScriptName;Healing-Potion
-            --&Button|[sheetbutton[&ButtonColor]][*R:equipment_item] [&PAREN1][&NumUses][&Slash][&UsesMax][&PAREN2]::ItemScripts::[&ScriptName][/sheetbutton]
+            --/|Button|[sheetbutton[&ButtonColor]][*R:equipment_item] [&PAREN1][&NumUses][&Slash][&UsesMax][&PAREN2]::ItemScripts::[&ScriptName][/sheetbutton]
+
+            --&Button|[button][*R:equipment_item] [&PAREN1][&NumUses][&Slash][&UsesMax][&PAREN2]::~[&ITEMSCRIPTMULE]|[&ScriptName][/button]
+
       --^SkipSheetButton|
 
       --:MakeSpellSheetButton|
-      --&Button|[sheetbutton[&ButtonColor]][*R:equipment_item] [&PAREN1][&NumUses][&Slash][&UsesMax][&PAREN2]::SpellScripts::[*R:equipment_item][/sheetbutton]
+      
+        --&Button|[button][*R:equipment_item] [&PAREN1][&NumUses][&Slash][&UsesMax][&PAREN2]::~[&ITEMSCRIPTMULE]|Use-Item-Abilities[/button]
+
       --^SkipSheetButton|
 
       --:SkipSheetButton|
@@ -99,6 +108,7 @@
       --Rnext|
       --?"[*R:equipment_item]" -ne "NoRepeatingAttributeLoaded"|EquipmentButtonDisplay
       --+|[&PrintButtons]
+
       --X|
 
       --:USE_ITEM|
