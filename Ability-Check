@@ -3,7 +3,7 @@
 --/|Script Name: Ability-Check
 --/|Location: CharacterScripts
 
---/|Version: 2022.12.14.001 // added whisper to cha checks
+--/|Version: 2023.04.26.001 // fixed 18/91 issue
 
 --/|FORMATTING SECTION
 --/|==============================================================================================================
@@ -43,6 +43,7 @@
   --X|
 
   --:ABILITY_CHECK|AbilityName;DC
+  --#whisper|
   --~params|string;split;|;[&reentryval]
   --&AbilityName|[&params1]
   --=AbilityScore|[*S:[&AbilityName]]
@@ -50,7 +51,8 @@
   --&SpellName|[&params3]
 
   --/|DIFFICULTY CHECK ROLL
-  --#whisper|self,gm
+  --&WHISPER_TO|
+
   --?"X[$DC]" -eq X|SkipDC
   --?"X[$DC]" -eq X0|SkipDC
   --?"[$DC]" -eq false|SkipDC
@@ -102,7 +104,7 @@
           --&MajorResultLine|[h4][&MajorResult]
           --]|
       --/|PRINT CARD
-      --#whisper|self,gm
+      --#whisper|
       --#title|[*S:t-name]'s Strength Check
       --+|[h1][&FirstLine]
       --+|[&MinorResultLine]
@@ -122,7 +124,7 @@
         --&CompResultLine|[h4][&CompResult]
         --]|
     --/|PRINT CARD
-    --#whisper|self,gm
+    --#whisper|
     --#title|[*S:t-name]'s Comprehend Check
     --+|[h1][&FirstLine]
     --+|[h2][b]Spell:[/b] [&SpellName]
@@ -145,7 +147,7 @@
         --&WisResultLine|[h4][&WisResult]
         --]|
     --/|PRINT CARD
-    --#whisper|self,gm
+    --#whisper|
     --#title|[*S:t-name]'s Priest Spell Failure Check
     --+|[h1][&FirstLine]
     --+|[&WisResultLine]
@@ -161,7 +163,7 @@
         --&DexResultLine|[h4][&DexResult]
         --]|
     --/|PRINT CARD
-    --#whisper|self,gm
+    --#whisper|
     --#title|[*S:t-name]'s Dexterity Check
     --+|[h1][&FirstLine]
     --+|[&DexResultLine]
@@ -185,7 +187,7 @@
             --&ResurrectSaveResultLine|[h4][&ResurrectSaveResult][&EndRow]
             --]|
     --/|PRINT CARD
-    --#whisper|self,gm
+    --#whisper|
     --#title|[*S:t-name]'s System/Resurrect Save
     --+|[h1][&FirstLine]
     --+|[&SystemSaveResultLine]
@@ -277,7 +279,7 @@
       --?[*S:exceptionalstrength] -eq 100|>SetMods;85;30;40
       --?"X[*S:exceptionalstrength]" -eq "X"|>SetMods;50;0;16
       --?"[*S:exceptionalstrength]" -eq "0"|>SetMods;50;0;16
-      --?[*S:exceptionalstrength] -gt 91 -and [*S:exceptionalstrength] -le 99|>SetMods;70;15;35
+      --?[*S:exceptionalstrength] -ge 91 -and [*S:exceptionalstrength] -le 99|>SetMods;70;15;35
       --?[*S:exceptionalstrength] -gt 75 -and [*S:exceptionalstrength] -lt 91|>SetMods;70;0;30
       --?[*S:exceptionalstrength] -gt 50 -and [*S:exceptionalstrength] -lt 76|>SetMods;70;0;25
       --?[*S:exceptionalstrength] -lt 51|>SetMods;50;0;20
@@ -288,6 +290,14 @@
       --=StrMinor|[%1%]
       --=StrLocked|[%2%]
       --=StrMajor|[%3%]
+
+      --?"[*S:secondary_skill]" -inc labor|[
+          --=StrMinor|[$StrMinor] + 5 [BONUS]
+          --=StrMajor|[$StrMajor] + 5 [BONUS]
+          --]|
+          --?"[*S:secondary_skill]" -inc labor -and [$StrLocked] -gt 0|[
+            --=StrLocked|[$StrLocked] + 5 [BONUS]
+            --]|
       --:SkipSetMods|
   --<|
 
