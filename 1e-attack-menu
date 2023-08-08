@@ -2,10 +2,16 @@
 
 --/|Script Name: Attack-Menu
 
---/|Version: 2022.11.15.001
+--/|Version: 2023.07.12.001 // fixed backstab using the menu twice
 
 --/|SETTINGS SECTION
 --/|==============================================================================================================
+
+--&ShieldLargeMarker|shield-large::5465291
+--&ShieldMediumMarker|shield-medium::5465292
+--&ProEvilMarker|protection-from-evil::5838155
+--&ProGoodMarker|protection-from-good::5838156
+--&MirrorImageMarker|mirror-image::5609664
 
   --/|Armor Rating Adjustments; You can also turn off AR on the character sheet or set Weapon Adjustments to 0 (the default).
   --&ARSetting|ON
@@ -19,7 +25,7 @@
   --/|If set to ON, will look for statusmarkers on selected & target tokens to match against the database sheet.
   --&DatabaseSheetID|@{1e-attack-database|character_id}
   --&UseStatuses|ON
-  --&MirrorImageStatusmarker|purple
+  --&MirrorImageStatusmarker|mirror-image::5609664
 
   --/|Ranged Weapon Settings
   --&AskforRange|OFF
@@ -272,6 +278,47 @@
   --=MiscAttackAdj|0+[$HatredAttackAdj]
   --=MiscDamageAdj|0+[$RangerDamageAdj]
 
+--/|SHIELD VS MISSILE CHECK
+  --&SpecialShield|0
+  --?"[&WeaponType]" -ninc Missile|SkipShieldCheck
+  -->CHECK_STATUS_MARKER|[&TARGET_TOKEN_ID];[&ShieldLargeMarker];Shield_LG_Exists
+  --?[&Shield_LG_Exists] -eq 1|[
+      --&SpecialShield|1
+      --=FinalTargetAC|[$FinalTargetAC] - 1 [LG SHIELD]
+      --^SkipShieldCheck|
+      --]|
+  -->CHECK_STATUS_MARKER|[&TARGET_TOKEN_ID];[&ShieldMediumMarker];Shield_MD_Exists
+  --?[&Shield_MD_Exists] -eq 1|[
+  --&SpecialShield|1
+  --=FinalTargetAC|[$FinalTargetAC] - 1 [MED SHIELD]
+  --^SkipShieldCheck|
+    --]|
+  --:SkipShieldCheck|
+
+--/|PROTECTION FROM EVIL/GOOD
+  --&AttackerAlignment|N
+  --?"X[*[&SelectedId]:alignment]" -inc ce|&AttackerAlignment;E
+  --?"X[*[&SelectedId]:alignment]" -inc le|&AttackerAlignment;E
+  --?"X[*[&SelectedId]:alignment]" -inc ne|&AttackerAlignment;E
+  --?"X[*[&SelectedId]:alignment]" -inc evil|&AttackerAlignment;E
+  --?"X[*[&SelectedId]:alignment]" -inc cg|&AttackerAlignment;G
+  --?"X[*[&SelectedId]:alignment]" -inc lg|&AttackerAlignment;G
+  --?"X[*[&SelectedId]:alignment]" -inc ng|&AttackerAlignment;G
+  --?"X[*[&SelectedId]:alignment]" -inc good|&AttackerAlignment;G
+  --?"[*[&SelectedId]:alignment]" -eq Neutral|&AttackerAlignment;N
+  --?"[*[&SelectedId]:alignment]" -eq neutral|&AttackerAlignment;N
+  -->CHECK_STATUS_MARKER|[&TARGET_TOKEN_ID];[&ProEvilMarker];Pro_Evil_Exists
+  --?[&Pro_Evil_Exists] -eq 1 -and [&AttackerAlignment] -eq E|[
+      --=FinalTargetAC|[$FinalTargetAC] - 2 [PRO-EVIL]
+      --^SkipAlignCheck|
+      --]|
+  -->CHECK_STATUS_MARKER|[&TARGET_TOKEN_ID];[&ProGoodMarker];Pro_Good_Exists
+  --?[&Pro_Good_Exists] -eq 1 -and [&AttackerAlignment] -eq G|[
+      --=FinalTargetAC|[$FinalTargetAC] - 2 [PRO-GOOD]
+      --^SkipAlignCheck|
+      --]|
+  --:SkipAlignCheck|
+
   --:REPEAT_ATTACK|
 
   --&DescRowText|
@@ -390,8 +437,6 @@
 
         --?"X[&Marker]" -eq "X"|SkipTargetMarker
 
-
-
     --/|SET TARGET AC MODIFIERS DUE TO TARGET STATUSMARKERS
     --/|If using _dex or _shield you must include an _ac marker value of at least 0
 
@@ -430,21 +475,25 @@
         --&DEX_AC2|[*[&TargetedId]:armorbonus]
         --&ArmorClass|+ + [&DEX_AC2(replace,-,)]
 
-
-
         --:SkipTargetDexMarker|
 
         --/|Check for Multiple Conditions Affecting Shield
         --?"X[*[&DatabaseSheetID]:[&Marker]_shield]" -eq "Xundefined"|SkipTargetShieldMarker
         --?"[*[&DatabaseSheetID]:[&Marker]_shield]" -ne "shield"|SkipTargetShieldMarker
+
         --?[$SHIELD_COUNTER] -gt 1|SkipTargetShieldMarker
 
         --=SHIELD_COUNTER|[$SHIELD_COUNTER] + 1
 
         --&SHIELD_AC2|[*[&TargetedId]:armorclass_combined_shield_mod_magic]
+
+        --=ShieldValue|[*[&TargetedId]:armorclass_combined_shield_mod_magic]
+        --?[&SpecialShield] -eq 1|[
+          --=Special_Shield_AC|[$ShieldValue] + 1
+          --&SHIELD_AC2|[$Special_Shield_AC.Raw]
+          --]|
+
         --&ArmorClass|+ + [&SHIELD_AC2(replace,-,)]
-
-
 
         --:SkipTargetShieldMarker|
 
@@ -483,7 +532,6 @@
 
 
      --=TargetAC|[$FinalTargetAC] + [&ACMods] {MAX:10}
-
 
      --=TargetTouchAC|[$FinalTargetTouchAC] + [&ACMods] {MAX:10}
 
@@ -546,6 +594,8 @@
   --:SkipProfPenalty|
 
   --/|Backstab; BTB backstab only provides a +4 attack adj. if the target is surprised. If using conditions, this will tie to the Surprised condition. For now, it's added in by default.
+  --&Backstab|OFF
+  --*|weap name: [*R:weapon_name] b-flag: [*R:weapon_backstab_flag]
   --?"X[*R:weapon_backstab_flag]" -eq X|SkipBackstab
   --?"[*R:weapon_backstab_flag]" -eq 0|SkipBackstab
   --?"X[*R:weapon_backstab_flag]" -eq X0|SkipBackstab
@@ -725,10 +775,10 @@
   --?[&ApplyDamagetoToken] -ninc ON|SkipDeadX
      --!t:[&params3]|bar[&HitPointBar]_value:-=[$AdjustedDamageRoll]
      --&RemainingHP|[*T:t-bar[&HitPointBar]_value]
-     --?[&RemainingHP] -le 0|DeadX
+     --?[&RemainingHP] -lt 1|DeadX
   --^SkipDeadX|
   --:DeadX|
-     --@token-mod|_ignore-selected _ids [&params3] _set statusmarkers|dead
+    -->ADD_STATUS_MARKER|[&params3];dead
   --:SkipDeadX|
   --^PrintCard|
 
@@ -846,12 +896,24 @@
   --:DONE_REMOVE_STATUS_MARKER|
   --<|
 
+  --:DECREMENT_STATUS_MARKER|Token_ID;Status Marker;Optional:0=remove marker if decrementing from 0 or 1=Remove marker if decrementing TO 0.
+  -->CHECK_STATUS_MARKER|[%1%];[%2%];_DEC_EXIST;_DEC_COUNT
+  --?[&_DEC_EXIST] -eq 0|DONE_DECREMENT_STATUS_MARKER
+  --?[&_DEC_COUNT] -eq 0 -and "X[%3%]" -eq "X"|DONE_DECREMENT_STATUS_MARKER
+  -->REMOVE_STATUS_MARKER|[%1%];[%2%]
+  --?[&_DEC_COUNT] -eq 1 -and "X[%3%]" -eq "X1"|DONE_DECREMENT_STATUS_MARKER
+  --?[&_DEC_COUNT] -eq 0 -and "X[%3%]" -eq "X0"|DONE_DECREMENT_STATUS_MARKER
+  --?[&_DEC_COUNT] -gt 1|>ADD_STATUS_MARKER;[%1%];[%2%];[=[&_DEC_COUNT]-1]
+  --?[&_DEC_COUNT] -eq 1|>ADD_STATUS_MARKER;[%1%];[%2%]
+  --:DONE_DECREMENT_STATUS_MARKER|
+  --<|
+
   --:CHECK_STATUS_MARKER|TokenID;MarkerToFind;Exists;Counter
   --~|array;statusmarkers;Conditions;[%1%]
   --&FoundMarker|-1
   --%loop|0;[@Conditions(maxindex)]
     --&Temp|[@Conditions([&loop])]
-  --?[&Temp(indexof,[%2%])] -eq 0|&FoundMarker;[&loop]
+	--?[&Temp(indexof,[%2%])] -eq 0|&FoundMarker;[&loop]
   --%|
   --?[&FoundMarker] -ne -1|FOUND_STATUS_MARKER
   --&[%3%]|0 --&[%4%]|0 --<|
