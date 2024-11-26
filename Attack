@@ -1,0 +1,979 @@
+!script {{
+--/|Script Name: Attack
+--/|Location: VileDarknessScripts
+--/|Version: 2024.11.26.001 // incept
+
+--/|SETTINGS
+--/|#####################################################################################
+
+--/|The script may have problems processing fields with certain characters in it. Please try NOT to use the following characters in any of the repeating fields (such as Name or Notes):
+--/|Apostrophes, Quotes (any), Curly Brackets, Semi-colons, Double-dashes (two hyphens), Colons, Three plus signs, Two percentage signs
+--/|ANY INSTANCE OF TWO ADJACENT HYPHENS (DASHES) IN EITHER THE CHARACTER_ID or TOKEN_ID will cause ScriptCards to not execute properly. There are tools (Mods/APIs) you can find to detect these (google it) or you can manually check for them. To fix, delete the token and create/drag out another or, for character_id, Edit-Duplicate the character sheet.
+
+--/|This script uses DECENDING AC ONLY. ie. AC -10 to AC 10
+--/|This script uses Temp Size to assign size for weapon damage.
+--/|Ranged weapons won't decrement ammo in this basic script.
+
+--/|The ADJ button will allow you to add adjustments to Attack Roll, Damage and AC. Any adjustment will be added to all attacks by that weapon. ie. If shooting a bow with a fire rate of 2 and granting a +2 to attack rolls it will be added to both shots. NOTE: DO NOT add PLUS signs to positive numbers in these fields!
+
+--&TOKENBAR_HP|1
+--&TOKENBAR_AC|3
+
+--/|If you wish to set USE_WEAPON_TYPE_VS_ARMOR_RATING to "on", you MUST set the armor rating ("armor defense") using one of the token bars.
+--&TOKENBAR_AD|2
+
+--/|ATTACK_MENU: (on/off or null) Turning this off will not print any of the attack menus
+--&ATTACK_MENU|on
+
+--/|USE_WEAPON_TYPE_VS_ARMOR_RATING: (on/off or null) Turns on/off adj for weapon vs armor
+--&USE_WEAPON_TYPE_VS_ARMOR_RATING|on
+
+--/|SET_WEAPON_TYPE_VS_ARMOR_RATING: (AD/Attk) If using USE_WEAPON_TYPE_VS_ARMOR_RATING, I strongly recommend you use "AD" which will convert adjustments to adjust the AC (Max=10). If using Attk, these adjustments will be made to the Attack Roll.
+--&SET_WEAPON_TYPE_VS_ARMOR_RATING|AD
+
+--/|FLIP_WEAPON_TYPE_VS_ARMOR_RATING: (yes/no) If using USE_WEAPON_TYPE_VS_ARMOR_RATING, and SET_WEAPON_TYPE_VS_ARMOR_RATING is set to AD, you can flip the numbers in the Adjustments fields. ie. 1 becomes -1.
+--&FLIP_WEAPON_TYPE_VS_ARMOR_RATING|yes
+
+--/|USE_MISSILE_RANGE_ADJ: (yes/no) This will auto-apply missile range adjustments between the attacking token and target token. The MISSILE_RANGE_GRID_VALUE is set by default to 5-ft. NOTE: All ranges MUST have all 3 values set ie. 10/20/30 or, for a 60-ft ray, 60/61/62.
+--&USE_MISSILE_RANGE_ADJ|yes
+--&MISSILE_RANGE_GRID_VALUE|5
+
+--/|BACKSTAB_MULTIPLIER: (all/die or null) All will multiply all dmg and die will only multiply the weapon damage die
+--&BACKSTAB_MULTIPLIER|die
+
+--/|USE_TOUCH_AC: (yes/no) If no, touch attacks must hit the target's normal AC (as noted on the token). If set to yes, the attack script will calculate a 3e-style of Touch AC - only counting Dex, Magic, Misc, etc. but ignoring armor. Magical enhancements to armor are INCLUDED. ie. Plate +3, Shield +2, and Dex +2 = Touch AC 3. NOTE: If the attack does no damage, it is best to set the damage to 0d1.
+--&USE_TOUCH_AC|yes
+
+--/|NAT20_ALWAYS_HITS: (yes/no or null) 
+--&NAT20_ALWAYS_HITS|yes
+
+--/|NAT1_ALWAYS_MISSES: (yes/no or null) 
+--&NAT1_ALWAYS_MISSES|yes
+
+--/|CRITICAL_HIT_MULTIPLIER: (number/null) format for number is "* 2 [CRIT]" (without quotes)
+--&CRITICAL_HIT_MULTIPLIER|
+
+--/|USE_SOUNDS: (yes/no or null) You can set sounds (and FX) based on the activity or result.
+--&USE_SOUNDS|yes
+
+--&CREATURE_DEATH_SOUND|hit-creature
+--&MELEE_HIT_SUCCESS_SOUND|hit-sound
+--&MISSILE_HIT_SUCCESS_SOUND|arrow-hit
+--&CURE_SOUND|cure-spell-001
+--&MAGIC_EFFECT_SOUND|magic-spell-001
+--&DAMAGE_VIDEO_EFFECT|hit
+
+--/|STATUS MARKER NAMES
+--/|These should be unique. We will make a string out of all markers on a token and simply search it for the text.
+--/|The PlusAC, MinusAC, and Mirror-Image will use the number on the marker and thus, the marker name needs to be an exact match. Mirror-Image will cause each attack to have a chance to hit any remaining images (but the total number will decrement after each attack).
+--/|If you dont want to use markers, just replace the names after the variable with XX: for example "&Blind|XX"
+
+--/|NOTE REGARDING SHIELDS. In my games, we use statusmarkers to indicate a readied shield. However, for this basic script, I am assuming the gm/player will manually remove the shield from the token (given the complexity of shared sheet tokens and such). I may add the Shield script and the code to remove it based on marker later if requested.
+
+--/|Marker name includes:
+
+--&Blind|blind
+--&Charging|charg
+--&Faerie-Fire|faerie
+--&Fleeing|flee
+--&Helpless|helpless
+--&Immobile|immobile
+--&Invisible|invisible
+--&NoDex|nodex
+--&Slowed|slow
+--&Dead|dead
+
+--/|Exact name required:
+--&MinusAC|red
+--&PlusAC|green
+--&Mirror-Image|purple
+--&NoDamage|brown
+
+--/|MinusAC makes AC WORSE. PlusAC makes AC BETTER. The values MUST be set by adding a NUMBER to the marker! ie. Hover over the marker in the token markers dropdown selector and TYPE the number (range is limited to 1-9). NoDamage means the target  will take no damage (useful if magic is needed to hit but the weapon is mundane).
+
+--/|Condition Adjustments (not including nodex/noshield)
+--&ACAdj_Blind|
+--&ACAdj_Blind|++ 4 [Blind]
+--&AttackAdj_Blind|- 4 [Blind]
+--&AttackAdj_Charging|
+--&AttackAdj_Charging|++ 2 [Charging]
+--&AttackAdj_Fleeing|
+--&AttackAdj_Fleeing|++ 4 [vs Fleeing]
+--&ACAdj_Immobile|
+--&ACAdj_Immobile|++ 4 [Immobile]
+--&ACAdj_Invisible|
+--&ACAdj_Invisible|++ 4 [vs Invisible]
+--&AttackAdj_Invisible|- 4 [vs Invisible]
+--&ACAdj_Slowed|
+--&ACAdj_Slowed|++ 4 [Slowed]
+
+--/|MENU
+--/|#####################################################################################
+
+--#whisper|self
+-->SET_FORMAT|
+--#debug|0
+--+|[hr [&HORIZONTAL_RULE_COLOR]]
+
+--~ST|array;getfirst;SC_SelectedTokens
+-->GET_SELECTED_FOR_MENU|
+
+--#reentrant|1e_ActionMenu_[&SendingPlayerID]_[&ST]
+--#subtitleSeparator|
+-->SET_TITLE|Action Menu
+-->SET_SUBTITLE|for [&SN]
+--?"[&ATTACK_MENU]" -ne on|skip_ATTACKS_MENU
+-->ATTACKS_MENU|
+--:skip_ATTACKS_MENU|
+
+--X|
+
+--:ATTACKS_MENU|
+--&ASK_FOR_TARGET|&#64;{target|token_id}
+--&ASK_FOR_ADJ|&#63;{Attack Adj.|0}|&#63;{Damage Adj.|0}|&#63;{Target AC Adj. (Negative values make AC Worse)|0}
+--~|hashtable;fromrepeatingsection;[&SC];repeating_weapon;weapon_name;MyAttacks
+--~|array;fullrepeatingsection;Attack_List;[&SC];repeating_weapon;weapon_name:weapon_use:weapon_attack_type:weapon_tohitbonus:weapon_magicbonus:weapon_prof_flag:weapon_prof_pen:weapon_dual:weapon_dual_pen:weapon_damagesmallmedium:weapon_damage_large:weapon_attackdmgbonus:weapon_attackdmgtype:weapon_rateoffire:weapon_num_attacks:weapon_range:weapon_ammo:weapon_quantity:weapon_speed:weapon_length:weapon_space:weapon_misc;%%
+
+--/|FIELD VALUES: 1=weapon_name; 2=weapon_use; 3=weapon_attack_type; 4=weapon_tohitbonus; 5=weapon_magicbonus; 6=weapon_prof_flag; 7=weapon_prof_pen; 8=weapon_dual; 9=weapon_dual_pen; 10=weapon_damagesmallmedium; 11=weapon_damage_large; 12=weapon_attackdmgbonus; 13=weapon_attackdmgtype; 14=weapon_rateoffire; 15=weapon_num_attacks; 16=weapon_range; 17=weapon_ammo; 18=weapon_quantity; 19=weapon_speed; 20=weapon_length; 21=weapon_space; 22=weapon_misc; 23=weapon_notes (weapon notes is left off due to the need to parse the field)
+
+--&MELEE_BUTTONS|
+--&MISSILE_BUTTONS|
+--%AttackList_loop|foreach;Attack_List
+--~Attack_FieldValues|string;split;%%;[&AttackList_loop]
+--&ROWID|[:MyAttacks("[&Attack_FieldValues1]_sectionid")]
+--?"[&Attack_FieldValues3]" -eq 0 -or "[&Attack_FieldValues3]" -eq 2|[
+--&MELEE_BUTTONS|+ [&SP][rbutton:sf [&Attack_FieldValues19] ][&Attack_FieldValues1]::MAKE_ATTACK;[&ROWID]/[&ASK_FOR_TARGET][/rbutton][r][rbutton:Use to Add Custom Roll Adjs ]ADJ::MAKE_ATTACK;[&ROWID]/[&ASK_FOR_TARGET]/[&ASK_FOR_ADJ][/rbutton][&SP][/r]
+--]|
+--?"[&Attack_FieldValues3]" -eq 1 -or "[&Attack_FieldValues3]" -eq 3|[
+--&MISSILE_BUTTONS|+ [&SP][rbutton:Range [&Attack_FieldValues16] ][&Attack_FieldValues1]::MAKE_ATTACK;[&ROWID]/[&ASK_FOR_TARGET][/rbutton][r][rbutton:Use to Add Custom Roll Adjs ]ADJ::MAKE_ATTACK;[&ROWID]/[&ASK_FOR_TARGET]/[&ASK_FOR_ADJ][/rbutton][&SP][/r]
+--]|
+--%|
+--?"X[&MELEE_BUTTONS]" -ne X|[
+-->MAKE_TITLE_ROW|GOLDENROD_LIGHT;BLACK;[b]Melee Attacks[/b]
+--+|[&MELEE_BUTTONS]
+--]|
+--?"X[&MISSILE_BUTTONS]" -ne X|[
+-->MAKE_TITLE_ROW|GOLDENROD_LIGHT;BLACK;[b]Missile Attacks[/b]
+--+|[&MISSILE_BUTTONS]
+--]|
+--<|
+
+--:GET_SELECTED_FOR_MENU|
+--~firstToken|array;getfirst;SC_SelectedTokens
+--&firstChar|[*[&firstToken]:character_id]
+--%ST|foreach;SC_SelectedTokens
+--~|array;statusmarkers;SourceTokenMarkersString;[&ST]
+--?"[&SourceTokenMarkersString]" -inc dead|skip_SourceTokenLoop
+--&SC|[*[&ST]:character_id]
+--&SN|[*[&ST]:t-name]
+--&SN|[&SN(replaceall,', )]
+--&SN|[&SN(replaceall,%27, )]
+--&SN|[&SN(replaceall,", )]
+--&SN|[&SN(replaceall,%22, )]
+--&SCN|[*[&ST]:character_name]
+--?"[&firstChar]" -ne "[&SC]"|DIFFERENT_SHEET_ERROR
+--?"[&firstToken]" -ne [&ST] -and [@SC_SelectedTokens(length)] -ne 1|[
+--~SN|string;nonumbers;[&SN]
+--&SN|[&SN(replaceall,-, )]s
+--&SN|some [&SN(replaceall, ,)]
+--]|
+--:skip_SourceTokenLoop|
+--%|
+--<|
+
+--:DIFFERENT_SHEET_ERROR|
+-->SET_TITLE|Error
+-->SET_SUBTITLE|
+--+|[&TB][b]Error.[/b] Please only select tokens tied to a single sheet.[&TE]
+--X|
+
+--/|MAKE ATTACK
+--/|#####################################################################################
+
+--:MAKE_ATTACK|REENT: 1=ROWID/2=TARGETTOKENID/3=ADJSTRING
+--#whisper|
+--#subtitleSeparator|[&SUBTITLE_SYMBOL]
+--~AttackParams|string;split;/;[&reentryval]
+--?"X[&AttackParams3]" -ne X|[
+--~UserAdj|string;split;|;[&AttackParams3]
+--/|UserAdj1=Attack; UserAdj2=Damage; UserAdj3=Target AC
+--]|
+--?"X[&UserAdj1]" -ne X -and "[&UserAdj1]" -ne 0|[
+--&AttackAdj_User|
+--?"[&UserAdj1]" -ninc -|&AttackAdj_User;++ [&UserAdj1] [USER]|&AttackAdj_User;+ [&UserAdj1] [USER]
+--]|
+--?"X[&UserAdj2]" -ne X -and "[&UserAdj2]" -ne 0|[
+--&DamageAdj_User|
+--?"[&UserAdj2]" -ninc -|&DamageAdj_User;++ [&UserAdj2] [USER]|&DamageAdj_User;+ [&UserAdj2] [USER]
+--]|
+--?"X[&UserAdj3]" -ne X -and "[&UserAdj3]" -ne 0|[
+--&ACAdj_User|
+--?"[&UserAdj3]" -ninc -|&ACAdj_User;+- [&UserAdj3] [USER]|&ACAdj_User;++ [&UserAdj3] [USER]
+--]|
+
+--/|Loop for Multiple Attackers
+--%ST|foreach;SC_SelectedTokens
+-->SET_TOKEN_VARS|[&ST];[&AttackParams2]
+--Rbysectionid|[&SC];repeating_weapon;[&AttackParams1]
+--/|Loop for Multiple Attacks by Weapon
+-->WEAPON_ATTACK_LOOP|
+
+--%|
+
+--X|
+
+--/|FIELD VALUES: 1=weapon_name; 2=weapon_use; 3=weapon_attack_type; 4=weapon_tohitbonus; 5=weapon_magicbonus; 6=weapon_prof_flag; 7=weapon_prof_pen; 8=weapon_dual; 9=weapon_dual_pen; 10=weapon_damagesmallmedium; 11=weapon_damage_large; 12=weapon_attackdmgbonus; 13=weapon_attackdmgtype; 14=weapon_rateoffire; 15=weapon_num_attacks; 16=weapon_range; 17=weapon_ammo; 18=weapon_quantity; 19=weapon_speed; 20=weapon_length; 21=weapon_space; 22=weapon_misc; 23=weapon_notes
+
+--:WEAPON_ATTACK_LOOP|
+--&NumAttacks|
+--?"[*R:weapon_attack_type]" -eq 0 -or "[*R:weapon_attack_type]" -eq 2|[
+--&NumAttacks|[*R:weapon_num_attacks]
+--]|
+--?"[*R:weapon_attack_type]" -eq 1 -or "[*R:weapon_attack_type]" -eq 3|[
+--&NumAttacks|[*R:weapon_rateoffire]
+--]|
+-->GET_ROUND_INFO|
+
+--?"X[&SN-Multi]" -ne X|>SET_EMOTE;[&SN-Multi] [&AttackEmoteText] [&TN]|>SET_EMOTE;[&SN] [&AttackEmoteText] [&TN]
+
+-->SET_TITLE|[*R:weapon_name]
+--?"X[&ROUND_NUMBER]" -ne X|>SET_SUBTITLE;Round [&ROUND_NUMBER];[*R:weapon_attackdmgtype]|>SET_SUBTITLE;[*R:weapon_attackdmgtype]
+--+|[hr [&HORIZONTAL_RULE_COLOR]]
+
+--%AttackCounter|1;[&NumAttacks]
+--#noMinMaxHighlight|0
+--&AttackAdj_Str|
+--&AttackAdj_Dex|
+--&AttackAdj_ToHit|
+--&AttackAdj_Magic|
+--&AttackAdj_ProfPen|
+--&AttackAdj_Dual|
+--&AttackAdj_AD|
+--&AttackAdj_Markers|
+--&AttackAdj_Backstab|
+
+--?"[&USE_MISSILE_RANGE_ADJ]" -eq yes -and "[*R:weapon_attack_type]" -eq 1|>GET_RANGE_ADJ
+
+--?"[*R:weapon_attack_type]" -eq 0 -or "[*R:weapon_attack_type]" -eq 2|>GET_STR_ADJ
+--?"[*R:weapon_attack_type]" -eq 1 -or "[*R:weapon_attack_type]" -eq 3|>GET_DEX_ADJ
+
+--?"X[*R:weapon_tohitbonus]" -ne X -and "X[*R:weapon_tohitbonus]" -ne X0|[
+--?"[*R:weapon_tohitbonus]" -ninc -|&AttackAdj_ToHit;++ [*R:weapon_tohitbonus] [TO HIT]|&AttackAdj_ToHit;+ [*R:weapon_tohitbonus] [TO HIT]
+--]|
+
+--?"X[*R:weapon_magicbonus]" -ne X -and "X[*R:weapon_magicbonus]" -ne X0|[
+--?"[*R:weapon_magicbonus]" -ninc -|&AttackAdj_Magic;++ [*R:weapon_magicbonus] [MAGIC]|&AttackAdj_Magic;+ [*R:weapon_magicbonus] [MAGIC]
+--]|
+
+--?"[*R:weapon_prof_flag]" -eq 1|[
+--&AttackAdj_ProfPen|[*R:weapon_prof_pen] [PROF PENALTY]
+--]|
+
+--?"[*R:weapon_backstab_flag]" -eq 1|[
+--&AttackAdj_Backstab|++ [*R:weapon_backstab_bonus] [BACKSTAB]
+--]|
+
+--?"[*R:weapon_dual]" -eq Primary -or "[*R:weapon_dual]" -eq Secondary|[
+--?"X[*R:weapon_dual_pen]" -ne X -and "X[*R:weapon_dual_pen]" -ne X0|&AttackAdj_Dual;[*R:weapon_dual_pen] [[*R:weapon_dual[&2CB]
+--]|
+
+--?"[&USE_WEAPON_TYPE_VS_ARMOR_RATING]" -eq on|>GET_ARMORDEFENSE_ADJ
+
+-->APPLY_STATUSMARKER_ADJS|[&ST];[&TT]
+
+--=AttackRoll|1d20 [&AttackAdj_Str] [&AttackAdj_Dex] [&AttackAdj_ToHit] [&AttackAdj_Magic] [&AttackAdj_ProfPen] [&AttackAdj_Backstab] [&AttackAdj_Range] [&AttackAdj_Dual] [&AttackAdj_AD] [&AttackAdj_User] [&AttackAdj_Markers]
+
+--?[=[@SC_SelectedTokens(length)] ] -gt 1|>MAKE_TITLE_ROW;GOLDENROD_LIGHT;PURPLE;[F:Raleway:13]*[&SN]s Attack vs [&TN]*[/F]
+--?[=[@SC_SelectedTokens(length)] ] -gt 1|+;[hr [&GOLDENROD_DARK]]
+
+--=TargetAC|[*[&TT]:t-bar[&TOKENBAR_AC]_value] [BASE] [&ACAdj_AD][&ACAdj_Markers][&ACAdj_User] {MAX:10}
+
+--?"[&USE_TOUCH_AC]" -eq yes -and "[*R:weapon_attack_type]" -eq 2|>GET_TOUCH_AC
+--?"[&USE_TOUCH_AC]" -eq yes -and "[*R:weapon_attack_type]" -eq 3|>GET_TOUCH_AC
+
+--+|[c][b]Attack Roll[/b] [$AttackRoll] vs AC [$TargetAC] ([=[*[&SC]:thac[$TargetAC.Raw]] ])[/c]
+--+|[hr [&GOLDENROD_DARK]]
+
+-->DETERMINE_ATTACK_RESULT|
+-->ROLL_DAMAGE|[&AttackResult]
+
+--?"[&AttackResult]" -eq Hit|[
+-->VDLIB_COLOR|[&GOLDENROD_LIGHT];[&BLACK];
+--+|[&TB][*R:weapon_notes][&TE]
+-->SET_FORMAT|
+--+|[hr [&GOLDENROD_DARK]]
+--]|
+
+--%|
+--<|
+
+--:APPLY_DAMAGE|
+--?"[&TargetMarkers]" -inc "[&NoDamage]"|[
+--*|[c][b]Target actually takes NO DAMAGE![/b][/c]
+--^skip_ApplyDamage|
+--]|
+--?"[*[&TT]:is_foe]" -ne 1|[
+--&CurrentHP|[*[&TT]:t-bar[&TOKENBAR_HP]_value]
+--=NewHP|[*[&TT]:t-bar[&TOKENBAR_HP]_value] - [$DamageRoll.Raw]
+-->VDLIB_COLOR|[&GOLDENROD_LIGHT];[&BLACK];
+--+|[c][F:Raleway][i][&TN]'s hp go from [&CurrentHP] to [$NewHP.Raw].[/i][/F][/c]
+-->SET_FORMAT|
+--+|[hr [&GOLDENROD_DARK]]
+--]|
+--?"[*[&TT]:is_foe]" -eq 1|[
+--&CurrentHP|[*[&TT]:t-bar[&TOKENBAR_HP]_value]
+--=NewHP|[*[&TT]:t-bar[&TOKENBAR_HP]_value] - [$DamageRoll.Raw]
+--]|
+--?[$NewHP] -lt 1|[
+--a|[&CREATURE_DEATH_SOUND]
+--!t:[&TT]|statusmarkers:[&Dead]
+--]|
+-->1eAM_APPLY_DAMAGE_OR_HEALING|[&TT];1;-[$DamageRoll.Raw];0;1;1
+--:skip_ApplyDamage|
+--<|
+
+--/|1eAM_APPLY_DAMAGE_OR_HEALING|tokenid;bar#;amount;display (0 or 1);Allow Overhealing (0 or 1); Allow negative hp (0 or 1)
+--/|Applies damage (negative number) or healing (positive number) to (tokenid)'s (bar#) token bar.
+--:1eAM_APPLY_DAMAGE_OR_HEALING|tokenid;bar#;amount;display (0 or 1);allow overheal (0 or 1);allow negative hp (0 or 1)
+  --=_applyValue|[%3%]
+  --=_newValue|[*[%1%]:t-bar[%2%]_value] + [$_applyValue]
+  --?[$_newValue] -lt 0 -and "X[%6%]" -ne "X1"|=_newValue;0
+  --?"X[%5%]" -ne "X1" -and [$_newValue] -gt [*[%1%]:t-bar[%2%]_max]|=_newValue;[*[%1%]:t-bar[%2%]_max]
+  --?"X[%4%]" -eq "X1"|+Applying;[%3%] HP to [*[%1%]:t-name]
+  --!t:[%1%]|bar[%2%]_value:[$_newValue.Raw]
+--<|
+
+--:DETERMINE_ATTACK_RESULT|
+--&AttackResult|
+
+--?"[&OutofRange]" -eq yes|[
+--&AttackResult|Miss
+--^skip_roll_query|
+--]|
+
+--?[$AttackRoll.Base] -eq 1 -and "[&NAT1_ALWAYS_MISSES]" -eq yes|[
+--&AttackResult|Miss
+--^skip_roll_query|
+--]|
+--?[$AttackRoll.Base] -eq 20 -and "[&NAT20_ALWAYS_HITS]" -eq yes|[
+--&AttackResult|Hit
+--?"X[&CRITICAL_HIT_MULTIPLIER]" -ne X|&DamageAdj_Multiplier;[&CRITICAL_HIT_MULTIPLIER]
+--^skip_roll_query|
+--]|
+--?[$AttackRoll] -ge [=[*[&SC]:thac[$TargetAC.Raw]] ]|[
+--&AttackResult|Hit
+--]|
+--?[$AttackRoll] -lt [=[*[&SC]:thac[$TargetAC.Raw]] ]|[
+--&AttackResult|Miss
+--]|
+--:skip_roll_query|
+--<|
+
+--:ROLL_DAMAGE|AttackResult
+--&DamageAdj_Magic|
+--&DamageAdj_DmgField|
+--&DamageAdj_BackstabDie|
+--&DamageAdj_BackstabAll|
+
+--?"[%1%]" -eq Miss -or "X[%1%]" -eq X|skip_RollDamage
+
+--&I_HAVE_MIRROR_IMAGES|
+--&NUMBER_OF_IMAGES|
+--&AttackImage|off
+-->1eAM_CHECK_STATUS_MARKER|[&TT];[&Mirror-Image];I_HAVE_MIRROR_IMAGES;NUMBER_OF_IMAGES
+--?"[&I_HAVE_MIRROR_IMAGES]" -eq 1|>ATTACK_IMAGE
+
+--?"[*[&TC]:size2]" -eq S|&DamageRoll;[*R:weapon_damagesmallmedium] [DMG SM]
+--?"[*[&TC]:size2]" -eq M|&DamageRoll;[*R:weapon_damagesmallmedium] [DMG SM]
+--?"[*[&TC]:size2]" -eq L|&DamageRoll;[*R:weapon_damagelarge] [DMG L]
+
+--?"X[*R:weapon_magicbonus]" -ne X -and "X[*R:weapon_magicbonus]" -ne X0|[
+--?"[*R:weapon_magicbonus]" -ninc -|&DamageAdj_Magic;++ [*R:weapon_magicbonus] [MAGIC]|&DamageAdj_Magic;+ [*R:weapon_magicbonus] [MAGIC]
+--]|
+
+--?"X[*R:weapon_attackdmgbonus]" -ne X -and "X[*R:weapon_attackdmgbonus]" -ne X0|[
+--?"[*R:weapon_attackdmgbonus]" -ninc -|&DamageAdj_DmgField;++ [*R:weapon_attackdmgbonus] [DMG]|&DamageAdj_DmgField;+ [*R:weapon_attackdmgbonus] [DMG]
+--]|
+
+--?"[&BACKSTAB_MULTIPLIER]" -eq die -and "[*R:weapon_backstab_flag]" -eq 1|&DamageAdj_BackstabDie;* [*R:weapon_backstab_mult] [Backstab]
+--?"[&BACKSTAB_MULTIPLIER]" -eq all -and "[*R:weapon_backstab_flag]" -eq 1|[
+--&DamageAdj_BackstabAll|* [*R:weapon_backstab_mult] [Backstab]
+--&DamageAdj_Multiplier|
+--]|
+
+--#noMinMaxHighlight|1
+--=DamageRoll|[&DamageRoll] [&DamageAdj_BackstabDie] [&DamageAdj_Str] [&DamageAdj_Magic] [&DamageAdj_DmgField] [&DamageAdj_User] [&DamageAdj_Multiplier] [&DamageAdj_BackstabAll]
+--#noMinMaxHighlight|0
+
+--?"[&AttackResult]" -eq Hit -and "[&AttackImage]" -eq on|[
+-->VDLIB_COLOR|[&RED];[&WHITE]
+--+|[&MIRROR_IMAGE_TEXT]
+-->SET_FORMAT|
+--+|[hr [&GOLDENROD_DARK]]
+--^skip_RollDamage|
+--]|
+
+-->VDLIB_COLOR|[&GREEN];[&BLACK];
+--+|[c][b][%1%]![/b] for [$DamageRoll] Damage[/c]
+-->SET_FORMAT|
+--+|[hr [&GOLDENROD_DARK]]
+
+-->APPLY_DAMAGE|
+
+--?"[&USE_SOUNDS]" -eq yes -and "[*R:weapon_attack_type]" -eq 0|[
+--a|[&MELEE_HIT_SUCCESS_SOUND]
+--vtoken|[&TT] [&DAMAGE_VIDEO_EFFECT]
+--]|
+--?"[&USE_SOUNDS]" -eq yes -and "[*R:weapon_attack_type]" -eq 1|[
+--a|[&MISSILE_HIT_SUCCESS_SOUND]
+--vtoken|[&TT] [&DAMAGE_VIDEO_EFFECT]
+--]|
+--?"[&USE_SOUNDS]" -eq yes -and "[*R:weapon_attack_type]" -eq 2|[
+--a|[&MAGIC_EFFECT_SOUND]
+--vtoken|[&TT] [&DAMAGE_VIDEO_EFFECT]
+--]|
+--?"[&USE_SOUNDS]" -eq yes -and "[*R:weapon_attack_type]" -eq 3|[
+--a|[&MAGIC_EFFECT_SOUND]
+--vtoken|[&TT] [&DAMAGE_VIDEO_EFFECT]
+--]|
+
+--:skip_RollDamage|
+
+--?"[%1%]" -eq Miss|[
+-->VDLIB_COLOR|[&RED];[&WHITE];
+--+|[c][b][%1%]![/b][/c]
+-->SET_FORMAT|
+--+|[hr [&GOLDENROD_DARK]]
+--]|
+--?"[&OutofRange]" -eq yes|[
+-->VDLIB_COLOR|[&GOLDENROD_LIGHT];[&BLACK];
+--+|[c][F:Raleway][b][&TN] is Out of Range![/b][/F][/c]
+-->SET_FORMAT|
+--+|[hr [&GOLDENROD_DARK]]
+--]|
+
+--<|
+
+--:GET_RANGE_ADJ|
+--&AttackAdj_Range|
+--&OutofRange|
+--~RangeValue|string;split;/;[*R:weapon_range]
+--~rawRange|distance;[&ST];[&TT]
+--=rangeFeet|[$rawRange] * [&MISSILE_RANGE_GRID_VALUE]
+
+--?[=[&RangeValue1]] -lt 1|[
+--#targetToken|[&TT]
+--#emoteText|*[&SN] attacks [&TN]*
+-->VDLIB_COLOR|[&RED];[&WHITE];
+--+|[&SP]Weapon range needs to be set.
+-->SET_FORMAT|
+--X|
+--]|
+
+--?[$rangeFeet] -le [=[&RangeValue1]]|&AttackAdj_Range;
+--?[$rangeFeet] -le [=[&RangeValue2]] -and [$rangeFeet] -gt [=[&RangeValue1]]|&AttackAdj_Range;-2 [Med Range]
+--?[$rangeFeet] -le [=[&RangeValue3]] -and [$rangeFeet] -gt [=[&RangeValue2]]|&AttackAdj_Range;-5 [Long Range]
+--?[$rangeFeet] -gt [=[&RangeValue3]]|[
+--&OutofRange|yes
+--]|
+--<|
+
+--:APPLY_STATUSMARKER_ADJS|AttackerTokenID;TargetTokenID
+--~|array;define;AttackerMarkersArray
+--~|array;define;TargetMarkersArray
+--&AttackerMarkers|
+--&TargetMarkers|
+--&ACAdj_Markers|
+--&DexRemovalTracker|off
+--&FOUND_MINUSAC|
+--&FOUND_PLUSAC|
+--&MINUSAC_VALUE|
+--&PLUSAC_VALUE|
+
+--~|array;statusmarkers;AttackerMarkersArray;[%1%]
+--~|array;statusmarkers;TargetMarkersArray;[%2%]
+--~AttackerMarkers|array;stringify;AttackerMarkersArray
+--~TargetMarkers|array;stringify;TargetMarkersArray
+
+--?"[&AttackerMarkers]" -inc "[&Blind]"|&AttackAdj_Markers;+ [&AttackAdj_Blind]
+--?"[&TargetMarkers]" -inc "[&Blind]"|&ACAdj_Markers;+ [&ACAdj_Blind]
+--?"[&AttackerMarkers]" -inc "[&Charging]"|&AttackAdj_Markers;+ [&AttackAdj_Charging]
+--?"[&TargetMarkers]" -inc "[&Fleeing]"|&AttackAdj_Markers;+ [&AttackAdj_Fleeing]
+--?"[&TargetMarkers]" -inc "[&Immobile]"|&ACAdj_Markers;+ [&ACAdj_Immobile]
+--?"[&AttackerMarkers]" -inc "[&Invisible]"|&ACAdj_Markers;+ [&ACAdj_Invisible]
+--?"[&TargetMarkers]" -inc "[&Invisible]"|&AttackAdj_Markers;+ [&AttackAdj_Invisible]
+--?"[&TargetMarkers]" -inc "[&Slowed]"|&ACAdj_Markers;+ [&Slowed]
+
+--?"[&TargetMarkers]" -inc "[&Charging]"|>REMOVE_DEX_FROM_AC;[%2%];Charging
+--?"[&TargetMarkers]" -inc "[&Immobile]"|>REMOVE_DEX_FROM_AC;[%2%];Immobile-NoDex
+--?"[&TargetMarkers]" -inc "[&Fleeing]"|>REMOVE_DEX_FROM_AC;[%2%];Fleeing-NoDex
+--?"[&TargetMarkers]" -inc "[&NoDex]"|>REMOVE_DEX_FROM_AC;[%2%];NoDex
+
+-->1eAM_CHECK_STATUS_MARKER|[%2%];[&MinusAC];FOUND_MINUSAC;MINUSAC_VALUE
+-->1eAM_CHECK_STATUS_MARKER|[%2%];[&PlusAC];FOUND_PLUSAC;PLUSAC_VALUE
+
+--?"[&FOUND_MINUSAC]" -eq 1|&ACAdj_Markers;++ [&MINUSAC_VALUE] [MinusAC]
+--?"[&FOUND_PLUSAC]" -eq 1|&ACAdj_Markers;+- [&PLUSAC_VALUE] [PlusAC]
+
+--<|
+
+--/|  1eAM_CHECK_STATUS_MARKER|TokenID;MarkerToFind;ExistsVariable (string);CountVariable (string)
+--/|          Will check the given token (TokenID) for the status marker (MarkerToFind) and set two return
+--/|          string variables: (ExistsVariable) will be 1 if the token has the marker, and (CountVariable)
+--/|          will contain the counter number on the marker (default 0 for no number)
+
+--:1eAM_CHECK_STATUS_MARKER|TokenID;MarkerToFind;Exists;Counter
+  --~|array;statusmarkers;Conditions;[%1%]
+  --&FoundMarker|-1
+  --%_libloop|0;[@Conditions(maxindex)]
+    --&Temp|[@Conditions([&_libloop])]
+  --?[&Temp(indexof,[%2%])] -eq 0|&FoundMarker;[&_libloop]
+  --%|
+  --?[&FoundMarker] -ne -1|1eAM_FOUND_STATUS_MARKER
+  --&[%3%]|0 --&[%4%]|0 --<|
+--:1eAM_FOUND_STATUS_MARKER|
+  --&[%3%]|1
+  --&[%4%]|0
+  --&ThisMarker|[@Conditions([&FoundMarker])]
+  --?[&ThisMarker(contains,@)] -eq 0|<
+  --~[%4%]|string;after;@;[@Conditions([&FoundMarker])]
+--<|
+
+--:1eAM_ADD_STATUS_MARKER|Token_ID;Status Marker;Count
+  -->1eAM_REMOVE_STATUS_MARKER|[%1%];[%2%]
+  --~|array;statusmarkers;Conditions;[%1%]
+  --&toAdd|[%2%]
+  --?"[%2%]" -ne "dead" -and "X[%3%]" -ne "X" -and "X[%3%]" -ne "X0"|=countToAdd;[%3%] {MIN:0} {MAX:9}
+  --?"[%2%]" -ne "dead" -and "X[%3%]" -ne "X" -and "X[%3%]" -ne "X0"|&toAdd;[%2%]@[$countToAdd.Raw]
+  --~|array;add;Conditions;[&toAdd]
+  --~newConditions|array;stringify;Conditions
+  --#parameterdelimiter|$
+  --~newConditions|string$replaceall$;$,$[&newConditions]
+  --#parameterdelimiter|;
+  --?"[&newConditions(0,1)]" -eq ","|&newConditions;[&newConditions(1)]
+  --!t:[%1%]|statusmarkers:[&newConditions]
+--<|
+
+--/|  1eAM_REMOVE_STATUS_MARKER|TokenID;MarkerToRemove
+--/|          Will remove any variation of (MarkerToRemove from the given token (TokenID)
+--/|
+--:1eAM_REMOVE_STATUS_MARKER|Token_ID;Status Marker
+  -->1eAM_CHECK_STATUS_MARKER|[%1%];[%2%];MarkerExists;MarkerCounter  
+  --?[&MarkerExists] -eq 0|<
+  --~|array;statusmarkers;Conditions;[%1%]
+  --?[&MarkerCounter] -eq 0|&toCheckFor;[%2%]|&toCheckFor;[%2%]@[&MarkerCounter]
+  --~hasCondition|array;indexof;Conditions;[&toCheckFor]
+  --?[&hasCondition] -eq "ArrayError"|<
+  --~|array;remove;Conditions;[&toCheckFor]
+  --~newConditions|array;stringify;Conditions
+  --#parameterdelimiter|$
+  --~newConditions|string$replaceall$;$,$[&newConditions]
+  --#parameterdelimiter|;
+  --!t:[%1%]|statusmarkers:[&newConditions]
+--<|  
+
+--/|  1eAM_DECREMENT_STATUS_MARKER|TokenID;MarkerToDecrement;Blank, 0 or 1 (OPTIONAL)
+--/|          If (MarkerToDecrement) exists on the on token (TokenID), the counter number will be
+--/|          decreased by 1. If a third parameter is added and set to 1, the status marker will
+--/|          be removed when decrementing from 1 to no counter. If set to 0, the marker will be
+--/|          be removed when decrementing for a marker without a counter. If not specified, the
+--/|          marker will not be removed when the counter would go below 1 or 0.
+--:1eAM_DECREMENT_STATUS_MARKER|Token_ID;Status Marker;Optional:0=remove marker if decrementing from 0 or 1=Remove marker if decrementing TO 0.
+  -->1eAM_CHECK_STATUS_MARKER|[%1%];[%2%];_DEC_EXIST;_DEC_COUNT
+  --?[&_DEC_EXIST] -eq 0|<
+  --?[&_DEC_COUNT] -eq 0 -and "X[%3%]" -eq "X"|<
+  -->1eAM_REMOVE_STATUS_MARKER|[%1%];[%2%]
+  --?[&_DEC_COUNT] -eq 1 -and "X[%3%]" -eq "X1"|<
+  --?[&_DEC_COUNT] -eq 0 -and "X[%3%]" -eq "X0"|<
+  --?[&_DEC_COUNT] -gt 1|>1eAM_ADD_STATUS_MARKER;[%1%];[%2%];[=[&_DEC_COUNT]-1]
+  --?[&_DEC_COUNT] -eq 1|>1eAM_ADD_STATUS_MARKER;[%1%];[%2%]
+--<|
+
+--:ATTACK_IMAGE|
+--&MIRROR_IMAGE_TEXT|
+--=CurrentNumberofImages|[&NUMBER_OF_IMAGES] + 1
+--=Target_is_Number|1d[$CurrentNumberofImages.Raw]
+--=Image_to_Attack|1d[$CurrentNumberofImages.Raw]
+--*|[&TB]Mirror Image: target is [$Target_is_Number] vs roll [$Image_to_Attack][&TE]
+--?[$Target_is_Number] -ne [$Image_to_Attack]|[
+--=NewNumberofImages|[&NUMBER_OF_IMAGES] - 1
+--&AttackImage|on
+--&MIRROR_IMAGE_TEXT|[c][b]Image Destroyed.[/b] Images go from [&NUMBER_OF_IMAGES] to [$NewNumberofImages.Raw].[/c]
+-->1eAM_DECREMENT_STATUS_MARKER|[&TT];[&Mirror-Image];1
+--]|
+--<|
+
+--:REMOVE_DEX_FROM_AC|TargetTokenID;HoverOverText
+--?"[&DexRemovalTracker]" -eq on|end_RemoveDexFromAC
+--&DexRemovalTracker|on
+--=TargetAC_DexAdj|[*[%1%]:armorbonus]
+--?"[&TargetMarkers]" -ninc "[&Charging]"|skip_ChargingAdjs
+--/|Charging Specific Rules
+--?"[&TargetMarkers]" -inc "[&Charging]" -and [$TargetAC_DexAdj] -gt 1|[
+--&ACAdj_Markers|++ 1 [[%2%[&2CB]
+--^skip_ChargingAdjs|
+--]|
+--?[$TargetAC_DexAdj] -lt 0|[
+--=TargetAC_DexAdj|[$TargetAC_DexAdj] * 1 {NEGATE}
+--]|
+--?"[&TargetMarkers]" -inc "[&Charging]" -and [$TargetAC_DexAdj] -gt 1|&ACAdj_Markers;++ [$TargetAC_DexAdj.Raw] [[%2%[&2CB]
+--?"[&TargetMarkers]" -inc "[&Charging]" -and [$TargetAC_DexAdj] -lt 2|&ACAdj_Markers;++ 1 [[%2%[&2CB]
+--^end_RemoveDexFromAC|
+--:skip_ChargingAdjs|
+--?[$TargetAC_DexAdj] -gt 1|end_RemoveDexFromAC
+--=TargetAC_DexAdj|[$TargetAC_DexAdj] * 1 {NEGATE}
+--&ACAdj_Markers|++ [$TargetAC_DexAdj.Raw] [[%2%[&2CB]
+--:end_RemoveDexFromAC|
+--<|
+
+
+--:GET_ARMORDEFENSE_ADJ|
+
+--?"[*[&TT]:t-bar[&TOKENBAR_AD]_value]" -eq -|skip_ARMORDEFENSE_ADJ
+--?[=[*[&TT]:t-bar[&TOKENBAR_AD]_value] ] -lt 0|skip_ARMORDEFENSE_ADJ
+--?[=[*[&TT]:t-bar[&TOKENBAR_AD]_value] ] -gt 10|skip_ARMORDEFENSE_ADJ
+
+--?"[&FLIP_WEAPON_TYPE_VS_ARMOR_RATING]" -eq yes|&NEGATE;{NEGATE}
+
+--&ArmorRating|
+--&ArmorRating|[*[&TT]:t-bar[&TOKENBAR_AD]_value]
+--=TargetArmorRatingAdj|[*R:weapon_thac_adj[&ArmorRating]] [&NEGATE]
+--&TargetArmorRatingAdj|[$TargetArmorRatingAdj.Raw]
+
+--?"[&SET_WEAPON_TYPE_VS_ARMOR_RATING]" -eq Attk -and "[&TargetArmorRatingAdj]" -ne 0|[
+--&AttackAdj_AD|
+--?"[&TargetArmorRatingAdj]" -ninc -|&AttackAdj_AD;++ [&TargetArmorRatingAdj] [vs Armor]|&AttackAdj_AD;+ [&TargetArmorRatingAdj] [vs Armor]
+--]|
+
+--?"[&SET_WEAPON_TYPE_VS_ARMOR_RATING]" -eq AD -and "[&TargetArmorRatingAdj]" -ne 0|[
+--&ACAdj_AD|
+--?"[&TargetArmorRatingAdj]" -ninc -|&ACAdj_AD;++ [&TargetArmorRatingAdj] [vs Armor]|&ACAdj_AD;+ [&TargetArmorRatingAdj] [vs Armor]
+--]|
+
+--:skip_ARMORDEFENSE_ADJ|
+--<|
+
+--:GET_STR_ADJ|
+--?"X[*[&SC]:meleebonus]" -ne X -and "X[*[&SC]:meleebonus]" -ne X0|[
+--&AttackAdj_Str|
+--&AttackAdj_Str|++ [*[&SC]:meleebonus] [STR]
+--]|
+--?"X[*[&SC]:dmgbonus]" -ne X -and "X[*[&SC]:dmgbonus]" -ne X0|[
+--&DamageAdj_Str|
+--&DamageAdj_Str|++ [*[&SC]:dmgbonus] [STR]
+--]|
+--<|
+
+--:GET_DEX_ADJ|
+--?"X[*[&SC]:rangedbonus]" -ne X -and "X[*[&SC]:rangedbonus]" -ne X0|[
+--&AttackAdj_Dex|
+--&AttackAdj_Dex|++ [*[&SC]:rangedbonus] [DEX]
+--]|
+--<|
+
+--:SET_TOKEN_VARS|SELECTEDTOKENID;TARGETTOKENID
+--&SC|[*[&ST]:character_id]
+--&SN|[*[&ST]:t-name]
+--&SN|[&SN(replaceall,', )]
+--&SN|[&SN(replaceall,%27, )]
+--&SN|[&SN(replaceall,", )]
+--&SN|[&SN(replaceall,%22, )]
+--&SCN|[*[&ST]:character_name]
+
+--&AttackEmoteText|attacks
+--?[=[@SC_SelectedTokens(length)] ] -gt 1|[
+--~SN-Multi|string;nonumbers;[&SN]
+--&SN-Multi|[&SN-Multi(replaceall,-, )]s
+--&SN-Multi|[&SN-Multi(replaceall, ,)]
+--&AttackEmoteText|attack
+--]|
+
+--&TT|[%2%]
+--&TC|[*[&TT]:character_id]
+--&TN|[*[&TT]:t-name]
+--&TN|[&TN(replaceall,', )]
+--&TN|[&TN(replaceall,%27, )]
+--&TN|[&TN(replaceall,", )]
+--&TN|[&TN(replaceall,%22, )]
+--&TCN|[*[&TT]:character_name]
+
+--#sourcetoken|[&ST]
+--#targettoken|[&TT]
+
+--<|
+
+--:GET_TOUCH_AC|
+
+--?"[*[&TC]:armortype_worn]" -eq 1 -and [=[*[&TC]:armortype_magic[&2CB] -gt 0|[
+--&AC_ArmorMagic|- [*[&TC]:armortype_magic][Magic Armor]
+--]|
+--?"[*[&TC]:armortype2_worn]" -eq 1 -and [=[*[&TC]:armortype2_magic[&2CB] -gt 0|[
+--&AC_ArmorMagic2|- [*[&TC]:armortype2_magic][Magic Armor]
+--]|
+--?"[*[&TC]:armorshield_worn]" -eq 1 -and [=[*[&TC]:armorshield_magic[&2CB] -gt 0|[
+--&AC_ShieldMagic|- [*[&TC]:armorshield_magic][Magic Shield]
+--]|
+--?"[*[&TC]:armorshield_worn]" -eq 1 -and [=[*[&TC]:armorshield_mod[&2CB] -gt 0|[
+--&AC_ShieldMisc|- [*[&TC]:armorshield_mod][Misc Shield]
+--]|
+--?"[*[&TC]:armorother_worn]" -eq 1 -and [=[*[&TC]:armorother_magic[&2CB] -gt 0|[
+--&AC_OtherMagic|- [*[&TC]:armorother_magic][Magic Other1]
+--]|
+--?"[*[&TC]:armorother_worn]" -eq 1 -and [=[*[&TC]:armorother_mod[&2CB] -gt 0|[
+--&AC_OtherMisc|- [*[&TC]:armorother_mod][Misc Other1]
+--]|
+--?"[*[&TC]:armorother2_worn]" -eq 1 -and [=[*[&TC]:armorother2_magic[&2CB] -gt 0|[
+--&AC_OtherMagic2|- [*[&TC]:armorother2_magic][Magic Other2]
+--]|
+--?"[*[&TC]:armorother2_worn]" -eq 1 -and [=[*[&TC]:armorother2_mod[&2CB] -gt 0|[
+--&AC_OtherMisc2|- [*[&TC]:armorother2_mod][Misc Other2]
+--]|
+--?"[*[&TC]:armorother3_worn]" -eq 1 -and [=[*[&TC]:armorother3_magic[&2CB] -gt 0|[
+--&AC_OtherMagic3|- [*[&TC]:armorother3_magic][Magic Other3]
+--]|
+--?"[*[&TC]:armorother3_worn]" -eq 1 -and [=[*[&TC]:armorother3_mod[&2CB] -gt 0|[
+--&AC_OtherMisc3|- [*[&TC]:armorother3_mod][Misc Other3]
+--]|
+--?"[*[&TC]:armorother4_worn]" -eq 1 -and [=[*[&TC]:armorother4_magic[&2CB] -gt 0|[
+--&AC_OtherMagic4|- [*[&TC]:armorother4_magic][Magic Other4]
+--]|
+--?"[*[&TC]:armorother4_worn]" -eq 1 -and [=[*[&TC]:armorother4_mod[&2CB] -gt 0|[
+--&AC_OtherMisc4|- [*[&TC]:armorother4_mod][Misc Other4]
+--]|
+--?"[*[&TC]:armorother5_worn]" -eq 1 -and [=[*[&TC]:armorother5_magic[&2CB] -gt 0|[
+--&AC_OtherMagic5|- [*[&TC]:armorother5_magic][Magic Other5]
+--]|
+--?"[*[&TC]:armorother2_worn]" -eq 1 -and [=[*[&TC]:armorother5_mod[&2CB] -gt 0|[
+--&AC_OtherMisc5|- [*[&TC]:armorother5_mod][Misc Other5]
+--]|
+--?"[*[&TC]:armorother6_worn]" -eq 1 -and [=[*[&TC]:armorother6_magic[&2CB] -gt 0|[
+--&AC_OtherMagic6|- [*[&TC]:armorother6_magic][Magic Other6]
+--]|
+--?"[*[&TC]:armorother6_worn]" -eq 1 -and [=[*[&TC]:armorother6_mod[&2CB] -gt 0|[
+--&AC_OtherMisc6|- [*[&TC]:armorother6_mod][Misc Other6]
+--]|
+--&ACAdj_Dex|
+--?[=[*[&TC]:armorbonus[&2CB] -gt 0|[
+--&ACAdj_Dex|
+--&ACAdj_Dex|++ [*[&TC]:armorbonus] [DEX]
+--]|
+--?[=[*[&TC]:armorbonus[&2CB] -lt 0|[
+--&ACAdj_Dex|[*[&TC]:armorbonus] [DEX]
+--]|
+--=TargetAC|10 [Base] [&ACAdj_Dex][&AC_ArmorMagic][&AC_ArmorMagic2][&AC_ShieldMagic][&AC_ShieldMisc][&AC_OtherMagic][&AC_OtherMisc][&AC_OtherMagic2][&AC_OtherMisc2][&AC_OtherMagic3][&AC_OtherMisc3][&AC_OtherMagic4][&AC_OtherMisc4][&AC_OtherMagic5][&AC_OtherMisc5][&AC_OtherMagic6][&AC_OtherMisc6][&ACAdj_Markers][&ACAdj_User] {MAX:10}
+
+--<|
+
+
+--:GET_ROUND_INFO|
+-->1eAM_GET_TURNORDER_LENGTH|Turns
+--&RoundInfo|
+--%turnLoop|1;[$Turns]
+-->1eAM_GET_NUMBERED_TURN_INFO|TID;INIT;CUSTOM;FORMULA;PAGE;name;[&turnLoop]
+--?"[&name]" -inc "Round"|&RoundInfo;[&name]
+--%|
+--?"X[&RoundInfo]" -eq "X"|DONE_FIND_ROUND
+--&ROUND_NUMBER|[&RoundInfo(word,-1)]
+--:DONE_FIND_ROUND|
+--<|
+
+--/|  1eAM_GET_NUMBERED_TURN_INFO
+--/|          This function is identical to the three above, except it adds an additional parameter the is the
+--/|          number of the turn to examine (in sequence) from the top of the turn tracker list (starting at 1)
+--/|          (ie, GET_NUMBERED_TURN_INFO|TID;INIT;CUSTOM;FORMULA;PAGE;NAME;TURNNUMBER)|
+--/|  1eAM_GET_TURNORDER_LENGTH|Return Var (Roll)
+--/|          This function returns the number of turns in the turn tracker
+
+--:1eAM_GET_NUMBERED_TURN_INFO|TokenID;InitCounter;CustomName;Formula;page;name;turnnumber
+  --?"X[$_toCount.Raw]" -eq "X"|>1eAM__to_PARSE_TURN_ORDER
+  --?[$_toCount] -lt [%7%]|1eAM__to_CLEAR_AND_RETURN
+  -->1eAM__to_GET_TURN_INFO|[%1%];[%2%];[%3%];[%4%];[%5%];[%6%];[&_to[%7%](replaceall,;,!!!)]
+--<|
+
+--:1eAM_GET_TURNORDER_LENGTH|ReturnValue
+  --?"X[$_toCount.Raw]" -eq "X"|>1eAM__to_PARSE_TURN_ORDER
+  --?"X[&_to1]" -eq "X"|=[%1%];0|=[%1%];[$_toCount]
+--<|
+--:1eAM__to_PARSE_TURN_ORDER|
+  --&_to_temp|[*C:turnorder]
+  --&_to_temp|[&_to_temp(replaceall,",)]
+  --&_to_temp|[&_to_temp(replaceall,;,!!!)]
+  --&_to_temp|[&_to_temp(1)] 
+  --&_to_temp|[&_to_temp(0,[=[&_to_temp(length)]-1])]
+  --?"X[&_to_temp]X" -eq "X[]X"|1eAM__to_CLEAR_AND_RETURN
+  --~_to|string;split;},{;[&_to_temp]
+--<|
+
+--:1eAM__to_CLEAR_AND_RETURN|
+  --&[%1%]| --&[%2%]| --&[%3%]| --&[%4%]| --&[%5%]| --&[%6%]| 
+--<|
+
+--:1eAM__to_GET_TURN_INFO|
+  --&_work_turn|[%7%]
+  --&_work_turn|[&_work_turn(replaceall,!!!,;)]
+  --&_work_turn|[&_work_turn(replaceall,{,)] --&_work_turn|[&_work_turn(replaceall,},)] 
+  --~_to_ThisTurn|string;split;,;[&_work_turn]
+  --%_toLoop|1;[$_to_ThisTurnCount]
+    --?"[&_to_ThisTurn[&_toLoop](0,2)]" -eq "id"|&[%1%];[&_to_ThisTurn[&_toLoop](replace,id:,)]
+    --?"[&_to_ThisTurn[&_toLoop](0,2)]" -eq "pr"|&[%2%];[&_to_ThisTurn[&_toLoop](replace,pr:,)]
+    --?"[&_to_ThisTurn[&_toLoop](0,2)]" -eq "cu"|&[%3%];[&_to_ThisTurn[&_toLoop](replace,custom:,)]
+    --?"[&_to_ThisTurn[&_toLoop](0,2)]" -eq "fo"|&[%4%];[&_to_ThisTurn[&_toLoop](replace,formula:,)]
+    --?"[&_to_ThisTurn[&_toLoop](0,2)]" -eq "_p"|&[%5%];[&_to_ThisTurn[&_toLoop](replace,_pageid:,)]
+  --%|
+  --?[&[%1%]] -ne -1|&[%6%];[*[&[%1%]]:t-name]|&[%6%];[&[%3%]]
+--<|
+
+
+
+--/|FORMATTING
+--/|#####################################################################################
+
+--:SET_EMOTE|emote text
+--#emotetext|*[%1%]*
+--<|
+
+--:SET_TITLE|title text
+--#title|[%1%]
+--<|
+
+--:SET_SUBTITLE|left subtitle text;right subtitle text
+--#leftsub|*[%1%]*
+--#rightsub|*[%2%]*
+--<|
+
+--:MAKE_TITLE_ROW|BGCOLOR;TEXTCOLOR;TEXTSTRING
+-->VDLIB_COLOR|[&[%1%]];[&[%2%]];
+--+|[&TB][%3%][&TE]
+-->SET_FORMAT|
+--<|
+
+--:SET_FORMAT|
+--&SP|&nbsp;
+--&TB|[t][tr][td style="text-align:left;vertical-align:middle;padding: 1px 5px 1px 5px;"]
+--&TE|[/td][/tr][/t]
+--&BOLD_ON|[b]
+--&BOLD_OFF|[/b]
+--&obrac|[ 
+--&cbrac|]
+--&2OB|[ 
+--&2OB|+[
+--&2CB|] 	
+--&2CB|+]
+--&RQ|@ --&RQ1|{ 
+
+--&BLACK|#000000
+--&GOLDENROD_DARK|#FFD853
+--&GOLDENROD_EXTRA_DARK|#DAA520
+--&GOLDENROD_LIGHT|#FFECA9
+--&GOLDENROD_SORTA_DARK|#806B29
+--&GOLDENROD_TITLE_DARK|#DFBD49
+--&GOLDENROD_TITLE_DARKER|#4D1635
+--&GOLDENROD_TITLE_LIGHT|#FFECA9
+--&GRAY_LIGHT|#D6D6D6
+--&GRAY_DARK|#a1a1a1
+--&GREEN|#7AFF53
+--&PINK|#f9e5f0
+--&PINK_DARK|#ce2c83
+--&PURPLE|#4D1635
+--&RED|#CC0000
+--&WHISPER_GREEN|#D1E6D9
+--&WHITE|#EEEEEE
+
+--&HORIZONTAL_RULE_COLOR|[&GOLDENROD_TITLE_DARK];
+--&SYMBOL|&#x25AA;
+--&SUBTITLE_SYMBOL|&#x2B29;
+
+--#emoteFont|Raleway
+--#emoteFontSize|14px
+--#emoteFontWeight|100
+--#titleFontFace|Rye
+--#titleFontSize|15px
+--#subtitleFontFace|Raleway
+--#subtitleFontSize|13px
+--#subtitleFontWeight|100
+--#bodyFontFace|Poppins
+--#bodyFontSize|13px
+--#bodyFontWeight|400
+--#buttonFontFace|Poppins
+--#buttonFontSize|13px
+
+--#emoteSourceTokenSize|40
+--#emoteTargetTokenSize|40
+
+--#titleFontColor|[&BLACK]
+--#titlefontshadow|;
+--#titleCardBottomBorder|4px solid [&BLACK];
+--#titleCardBackground|[&GOLDENROD_DARK];
+--#titleFontLineHeight|1.5em;
+--#subtitleFontColor|[&GOLDENROD_TITLE_DARKER];
+--/|subtitleSeparator|[&SUBTITLE_SYMBOL]
+--#LineHeight|1.5em
+--#rollHilightLineHeight|1.5em
+--#buttonBackground|[&GOLDENROD_DARK];
+--#buttonTextColor|[&BLACK];
+--#buttonPadding|0px
+--#buttonBorderColor|[&GOLDENROD_DARK];
+--#tableBGcolor|
+--#tableBorderRadius|4px;
+--#tableborder|2px solid [&GOLDENROD_EXTRA_DARK];
+--#tableShadow|0
+--#oddRowBackground|[&GOLDENROD_DARK];
+--#evenRowBackground|[&GOLDENROD_DARK];
+--#evenRowFontColor|[&BLACK];
+--#oddRowFontColor|[&BLACK];
+
+--<|
+
+--:SET_NORMAL_BUTTONS|
+--#buttonBackground|[&PURPLE]
+--#buttonTextColor|[&WHITE_COLOR]
+--#buttonFontSize|14px
+--#buttonPadding|5px
+--#buttonBorderColor|[&BLACK_COLOR]
+--<|
+
+--:VDLIB_COLOR| 1. ROW_BG; 2. FONT_COLOR; 3. EMOTE_BG; 4. TITLE_BG; 5. H_RULE; 6. CARD_BG; 7. TABLE_BORDER;
+--"[%1%]" -eq RESET|[
+  --#oddRowBackground|[%1%];
+  --#evenRowBackground|[%1%];
+  --#buttonBackground|[%1%];
+  --#buttonBorderColor|[%1%];
+  --#oddRowFontColor|[%2%];
+  --#evenRowFontColor|[%2%];
+  --#buttonTextColor|[%2%];
+  --#emoteBackground|[%3%];
+  --#titleCardBackground|[%4%];
+  --&HORIZONTAL_RULE_COLOR|[%5%];
+  --#tableBGcolor|[%6%];
+  --#tableborder|2px solid [%6%];
+  --]|
+--?"X[%1%]" -ne X -or "[%1%]" -ne 0|[
+  --#oddRowBackground|[%1%];
+  --#evenRowBackground|[%1%];
+  --#buttonBackground|[%1%];
+  --#buttonBorderColor|[%1%];
+  --]|
+--?"X[%2%]" -ne X -or "[%2%]" -ne 0|[
+  --#oddRowFontColor|[%2%];
+  --#evenRowFontColor|[%2%];
+  --#buttonTextColor|[%2%];
+  --]|
+--?"X[%3%]" -ne X -or "[%3%]" -ne 0|[
+  --#emoteBackground|[%3%];
+  --]|
+--?"X[%4%]" -ne X -or "[%4%]" -ne 0|[
+  --#titleCardBackground|[%4%];
+  --]|  
+--?"X[%5%]" -ne X -or "[%5%]" -ne 0|[
+  --&HORIZONTAL_RULE_COLOR|[%5%];
+  --]|
+--?"X[%6%]" -ne X -or "[%6%]" -ne 0|[
+  --#tableBGcolor|[%6%];
+  --]|
+--?"X[%7%]" -ne X -or "[%7%]" -ne 0|[
+  --#tableborder|2px solid [%7%];
+  --]|
+--:skip_color_changes|
+--<|
+
+}}
