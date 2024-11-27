@@ -1,5 +1,5 @@
 !script {{
---/|Script Name: Attack
+--/|Script Name: 1e Action Menu
 --/|Location: VileDarknessScripts
 --/|Version: 2024.11.26.001 // incept
 
@@ -16,14 +16,13 @@
 
 --/|The ADJ button will allow you to add adjustments to Attack Roll, Damage and AC. Any adjustment will be added to all attacks by that weapon. ie. If shooting a bow with a fire rate of 2 and granting a +2 to attack rolls it will be added to both shots. NOTE: DO NOT add PLUS signs to positive numbers in these fields!
 
+--&ATTACK_MENU|on
+
 --&TOKENBAR_HP|1
 --&TOKENBAR_AC|3
 
 --/|If you wish to set USE_WEAPON_TYPE_VS_ARMOR_RATING to "on", you MUST set the armor rating ("armor defense") using one of the token bars.
 --&TOKENBAR_AD|2
-
---/|ATTACK_MENU: (on/off or null) Turning this off will not print any of the attack menus
---&ATTACK_MENU|on
 
 --/|USE_WEAPON_TYPE_VS_ARMOR_RATING: (on/off or null) Turns on/off adj for weapon vs armor
 --&USE_WEAPON_TYPE_VS_ARMOR_RATING|on
@@ -503,6 +502,8 @@
 --?"[&AttackerMarkers]" -inc "[&Invisible]"|&ACAdj_Markers;+ [&ACAdj_Invisible]
 --?"[&TargetMarkers]" -inc "[&Invisible]"|&AttackAdj_Markers;+ [&AttackAdj_Invisible]
 --?"[&TargetMarkers]" -inc "[&Slowed]"|&ACAdj_Markers;+ [&Slowed]
+
+--?"[&TargetMarkers]" -inc "[&Helpless]"|&AttackAdj_Markers;++ 40 [vs Helpless]
 
 --?"[&TargetMarkers]" -inc "[&Charging]"|>REMOVE_DEX_FROM_AC;[%2%];Charging
 --?"[&TargetMarkers]" -inc "[&Immobile]"|>REMOVE_DEX_FROM_AC;[%2%];Immobile-NoDex
