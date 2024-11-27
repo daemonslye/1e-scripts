@@ -10,7 +10,7 @@
 --/|Apostrophes, Quotes (any), Curly Brackets, Semi-colons, Double-dashes (two hyphens), Colons, Three plus signs, Two percentage signs
 --/|ANY INSTANCE OF TWO ADJACENT HYPHENS (DASHES) IN EITHER THE CHARACTER_ID or TOKEN_ID will cause ScriptCards to not execute properly. There are tools (Mods/APIs) you can find to detect these (google it) or you can manually check for them. To fix, delete the token and create/drag out another or, for character_id, Edit-Duplicate the character sheet.
 
---/|This script uses DECENDING AC ONLY. ie. AC -10 to AC 10
+--/|This script uses DESCENDING AC ONLY. ie. AC -10 to AC 10
 --/|This script uses Temp Size to assign size for weapon damage.
 --/|Ranged weapons won't decrement ammo in this basic script.
 
